@@ -1,0 +1,10 @@
+{
+    "temp_dir": "temp_files",
+    "index_export_dir": "wordvec_model/index",
+    "src_database_path": "database/javaposts.db",
+    "src_question_dataframe": "data/q_clean_full.pkl",
+    "tfidf_model_path": "wordvec_model/tfidf_archive/tfidf_v0.1.pkl",
+    "fasttext_model_path": "wordvec_model/fasttext_archive/ft_v0.1.2.bin",
+    "index_qids_query": "SELECT Id FROM questions WHERE Score>=1 AND AnswerCount>=1 ORDER BY Id",
+    "metadata_query": "SELECT Id, Title, Tags, Score FROM questions WHERE Id IN {id_list} ORDER BY Id"
+}

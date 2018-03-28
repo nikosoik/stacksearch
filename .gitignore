@@ -1,0 +1,18 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# project specific files/folders
+*.html
+evaluation/*
+testing/
+src/post_classifier/param_testing/logs/*
+src/lib/*
+src/data/*
+src/database/*.db
+src/database/*.pkl
+src/wordvec_model/fasttext_archive/*
+src/wordvec_model/tfidf_archive/*
+src/wordvec_model/index/*
+src/wordvec_model/train_data/*
