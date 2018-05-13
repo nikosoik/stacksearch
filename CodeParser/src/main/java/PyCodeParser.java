@@ -4,12 +4,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.charset.StandardCharsets;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class PyCodeParser {
-
-    private static final Logger logger = LoggerFactory.getLogger(PyCodeParser.class);
 
     public static void main(String[] args) {
         boolean extractSequence = args.length > 0 ? Boolean.parseBoolean(args[0]) : false;
@@ -17,8 +12,6 @@ public class PyCodeParser {
         boolean keepComments = args.length > 2 ? Boolean.parseBoolean(args[2]) : false;
         boolean keepLiterals = args.length > 3 ? Boolean.parseBoolean(args[3]) : false;
         String sourceFile = args.length > 4 ? args[4] : null;
-
-        logger.info("Args: {}, {}, {}, {}, {}", args[0], args[1], args[2], args[3], String.valueOf(sourceFile));
 
         CodeParser cp = new CodeParser();
 
@@ -33,7 +26,7 @@ public class PyCodeParser {
                     System.out.println(outputString);
                 }
             } catch (Exception e) {
-                logger.error("Error while parsing {}.", sourceFile, e);
+                // Do nothing
             }
             return;
         }
@@ -46,11 +39,9 @@ public class PyCodeParser {
 
             if (inputString.equals("__START__")) {
                 sendEncodedString(inputString);
-                logger.info("Connection established.");
                 continue;
             } else if (inputString.equals("__END__")) {
                 sendEncodedString(inputString);
-                logger.info("Connection terminated.");
                 break;
             } else {
                 if (extractSequence) {
