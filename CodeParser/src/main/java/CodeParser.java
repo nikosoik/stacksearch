@@ -20,26 +20,46 @@ import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeS
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class CodeParser {
 
-    int wrapUsed;
-    final String[] wrapStart = { "", "class SampleClass {", "class SampleClass {\nvoid SampleMethod() {" };
-    final String[] wrapEnd = { "", "\n}", "\n}\n}" };
+    private static final String[] wrapStart = { "", "class SampleClass {",
+            "class SampleClass {\nvoid SampleMethod() {" };
+    private static final String[] wrapEnd = { "", "\n}", "\n}\n}" };
 
-    private class Entry implements Comparable<Entry> {
-        String name;
-        Position position;
+    private static class WrappedCompilationUnit {
+        private final int wrap;
+        private final CompilationUnit cu;
+
+        WrappedCompilationUnit(int wrap, CompilationUnit cu) {
+            this.wrap = wrap;
+            this.cu = cu;
+        }
+
+        public int getWrap() {
+            return wrap;
+        }
+
+        public CompilationUnit getCu() {
+            return cu;
+        }
+    }
+
+    private static class Entry implements Comparable<Entry> {
+        private final String name;
+        private final Position position;
 
         Entry(String name, Position position) {
             this.name = name;
             this.position = position;
         }
 
+        public String getName() {
+            return name;
+        }
+
         public Position getPosition() {
-            return this.position;
+            return position;
         }
 
         @Override
@@ -54,7 +74,8 @@ public class CodeParser {
         }
     }
 
-    public String extractCodeInfo(String inputCode, boolean keepImports, boolean keepComments, boolean keepLiterals) {
+    public static String extractCodeInfo(String inputCode, boolean keepImports, boolean keepComments,
+            boolean keepLiterals, boolean keepUnknownMethodCalls) {
         ArrayList<String> entries = new ArrayList<String>();
         ArrayList<Entry> entries_list = new ArrayList<Entry>();
 
@@ -63,7 +84,7 @@ public class CodeParser {
         typeSolver.add(new ReflectionTypeSolver());
 
         // Parse code
-        CompilationUnit cu = parseCodeSnippet(inputCode);
+        CompilationUnit cu = parseCodeSnippet(inputCode).cu;
         if (cu == null) {
             return "__ERROR__";
         }
@@ -88,14 +109,12 @@ public class CodeParser {
             }
         }
 
-        // Extract variable declarations/literals
+        // Extract literals and objects from FieldDeclarations, VariableDeclarationExpr
         if (keepLiterals) {
-            cu.findAll(VariableDeclarationExpr.class).forEach(vd -> {
-                for (VariableDeclarator var : vd.getVariables()) {
-                    String name = var.getType().asString().trim();
-                    Position position = var.getBegin().orElse(null);
-                    entries_list.add(new Entry("_VD_" + name, position));
-                }
+            cu.findAll(VariableDeclarator.class).forEach(vd -> {
+                String name = vd.getType().asString().trim();
+                Position position = vd.getBegin().orElse(null);
+                entries_list.add(new Entry("_VAR_" + name, position));
             });
         }
 
@@ -129,23 +148,26 @@ public class CodeParser {
                 if (exc.length == 2) {
                     String objectName = exc[1];
                     entries_list.add(new Entry("_MC_" + objectName + "." + methodName, position));
-                } else {
-                    entries_list.add(new Entry("_MC_" + methodName, position));
+                } else if (keepUnknownMethodCalls) {
+                    entries_list.add(new Entry("_UMC_" + methodName, position));
                 }
             }
         });
 
-        // Sort on line and column number
+        // Sort entries on their position
         Collections.sort(entries_list);
-        // Get api names
-        entries = entries_list.stream().map(obj -> new String(obj.name)).collect(ArrayList::new, ArrayList::add,
+        // Get entry names
+        entries = entries_list.stream().map(obj -> new String(obj.getName())).collect(ArrayList::new, ArrayList::add,
                 ArrayList::addAll);
 
         return String.join(", ", entries);
     }
 
-    public String parseCode(String inputCode, boolean keepImports, boolean keepComments, boolean keepLiterals) {
-        CompilationUnit cu = parseCodeSnippet(inputCode);
+    public static String parseCode(String inputCode, boolean keepImports, boolean keepComments, boolean keepLiterals) {
+        WrappedCompilationUnit wrappedCU = parseCodeSnippet(inputCode);
+        CompilationUnit cu = wrappedCU.cu;
+        int wrapUsed = wrappedCU.wrap;
+
         if (cu == null) {
             return "__ERROR__";
         }
@@ -179,22 +201,20 @@ public class CodeParser {
         return parsedCode;
     }
 
-    private CompilationUnit parseCodeSnippet(String codeSnippet) {
+    private static WrappedCompilationUnit parseCodeSnippet(String codeSnippet) {
         for (int i = 0; i < wrapStart.length; i++) {
             try {
                 String wrappedCodeSnippet = wrapStart[i] + codeSnippet + wrapEnd[i];
                 CompilationUnit cu = JavaParser.parse(wrappedCodeSnippet);
-                wrapUsed = i;
-                return cu;
+                return new WrappedCompilationUnit(i, cu);
             } catch (Exception e) {
                 continue;
             }
         }
-        wrapUsed = 0;
-        return null;
+        return new WrappedCompilationUnit(0, null);
     }
 
-    private NameExpr replaceLiteralType(LiteralExpr literal) {
+    private static NameExpr replaceLiteralType(LiteralExpr literal) {
         if (literal instanceof LiteralStringValueExpr) {
             if (literal instanceof CharLiteralExpr) {
                 return new NameExpr("__char__");
@@ -212,7 +232,6 @@ public class CodeParser {
         } else if (literal instanceof NullLiteralExpr) {
             return new NameExpr("null");
         }
-
         return new NameExpr("unk");
     }
 }

@@ -1,7 +1,5 @@
 import java.util.Base64;
 import java.util.Scanner;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.nio.charset.StandardCharsets;
 
 public class PyCodeParser {
@@ -11,25 +9,7 @@ public class PyCodeParser {
         boolean keepImports = args.length > 1 ? Boolean.parseBoolean(args[1]) : false;
         boolean keepComments = args.length > 2 ? Boolean.parseBoolean(args[2]) : false;
         boolean keepLiterals = args.length > 3 ? Boolean.parseBoolean(args[3]) : false;
-        String sourceFile = args.length > 4 ? args[4] : null;
-
-        CodeParser cp = new CodeParser();
-
-        if (sourceFile != null) {
-            try {
-                String fileContents = new String(Files.readAllBytes(Paths.get(sourceFile)));
-                if (extractSequence) {
-                    String entries = cp.extractCodeInfo(fileContents, keepImports, keepComments, keepLiterals);
-                    System.out.println(entries);
-                } else {
-                    String outputString = cp.parseCode(fileContents, keepImports, keepComments, keepLiterals);
-                    System.out.println(outputString);
-                }
-            } catch (Exception e) {
-                // Do nothing
-            }
-            return;
-        }
+        boolean keepUnknownMethodCalls = args.length > 4 ? Boolean.parseBoolean(args[4]) : false;
 
         Scanner scanner = new Scanner(System.in);
         while (scanner.hasNextLine()) {
@@ -45,10 +25,11 @@ public class PyCodeParser {
                 break;
             } else {
                 if (extractSequence) {
-                    String outputString = cp.extractCodeInfo(inputString, keepImports, keepComments, keepLiterals);
+                    String outputString = CodeParser.extractCodeInfo(inputString, keepImports, keepComments,
+                            keepLiterals, keepUnknownMethodCalls);
                     sendEncodedString(outputString);
                 } else {
-                    String outputString = cp.parseCode(inputString, keepImports, keepComments, keepLiterals);
+                    String outputString = CodeParser.parseCode(inputString, keepImports, keepComments, keepLiterals);
                     sendEncodedString(outputString);
                 }
             }

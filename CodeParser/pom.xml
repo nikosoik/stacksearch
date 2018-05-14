@@ -6,7 +6,7 @@
 
     <groupId>com.github.nikosoik</groupId>
     <artifactId>CodeParser</artifactId>
-    <version>0.1</version>
+    <version>0.1.5</version>
     
     <properties>
         <!-- Use Java 9 -->
