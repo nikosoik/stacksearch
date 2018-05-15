@@ -27,5 +27,10 @@ def list_to_disk(filename, _list):
             f.write(str(row).rstrip() + '\n')
 
 
-def remove_rows(_list, label_list):
-    return list(compress(_list, label_list))
+def remove_rows(_list, labels):
+    if isinstance(_list, str):
+        _list = load_text_list(_list)
+    if isinstance(labels, str):
+        labels = load_number_list(labels, mode='bool')
+
+    return list(compress(_list, labels))
