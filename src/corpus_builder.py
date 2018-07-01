@@ -1,23 +1,25 @@
 #!/usr/bin/env python
 
 import os
+import gc
 import pickle
 import sqlite3
+
 import pandas as pd
 
-from code_parser.codeparser import CodeParser
+from code_parser.codeparser_stdin import CodeParserStdin
 from post_classifier.classifier import PostClassifier
 from post_classifier.utils import (list_to_disk, load_number_list,
                                    load_text_list, remove_rows)
 from post_classifier.vectorizer import Vectorizer
-from preprocessing.text_eval import eval_text
-from preprocessing.utils import process_corpus
+from text_processing.text_eval import eval_text
+from text_processing.utils import process_corpus
 
-## Question query default settings
+# Question query default settings
 score_threshold = -3
 ans_count_threshold = 1
 
-## Database Queries
+# Database Queries
 INIT_QUESTION_QUERY = '''SELECT Body, Id FROM questions
     WHERE AnswerCount>={ans_count} AND Score>={score} ORDER BY Id ASC'''
 INIT_ANSWER_QUERY = '''SELECT Body, Id FROM answers
@@ -25,7 +27,7 @@ INIT_ANSWER_QUERY = '''SELECT Body, Id FROM answers
 INIT_COMMENT_QUERY = '''SELECT Text AS Body, Id FROM comments
     WHERE PostId IN {id_list} ORDER BY PostId ASC'''
 
-FINAL_QUESTION_QUERY = '''SELECT Id, Title, Tags, Score FROM questions
+FINAL_QUESTION_QUERY = '''SELECT Id, Title, Tags, SnippetCount, Score FROM questions
     WHERE Id IN {id_list} ORDER BY Id ASC'''
 FINAL_ANSWER_QUERY = '''SELECT Id, ParentId, Score FROM answers
     WHERE Id IN {id_list} ORDER BY ParentId ASC'''
@@ -46,12 +48,13 @@ class CorpusBuilder:
         self.vectorizer = Vectorizer(dictionary_path=vectorizer_dict_path)
         self.db_conn = sqlite3.connect(database_path)
         self.text_eval_fn = text_eval_fn
+        self.qparams = qparams
 
-        if qparams:
-            self.qparams = qparams
-
-        ## Create paths
+        # Create paths
+        self.temp_dir = 'temp_files'
         self.export_dir = export_dir
+        if not os.path.exists(self.temp_dir):
+            os.makedirs(self.temp_dir)
         if not os.path.exists(export_dir):
             os.makedirs(export_dir)
 
@@ -73,51 +76,53 @@ class CorpusBuilder:
         output_dict = {key: [] for key in cols}
 
         if eval_posts:
-            codeparser = CodeParser(
+            codeparser = CodeParserStdin(
                 index_path=os.path.join(self.export_dir, 'api_index'),
                 extract_sequence=True,
                 keep_imports=False,
                 keep_comments=True,
-                keep_literals=True,
-                keep_unknown_method_calls=False)
-            ## Format posts and discard low quality posts (excess punctuation)
+                keep_literals=False,
+                keep_method_calls=True,
+                keep_unsolved_method_calls=False)
+            # Format posts and discard low quality posts (excess punctuation)
             for idx, row in enumerate(c):
                 print('\rpost:', idx, end='')
                 body = row[0]
                 if post_type == 'com':  # replace quote char from comments
                     body = body.replace('`', ' ')
-                eval_res = self.text_eval_fn(body, codeparser)
+                eval_res = self.text_eval_fn(body, row[1], codeparser)
                 if eval_res != -1:
                     output_dict[cols[0]].append(eval_res)
                     for ii, val in enumerate(row[1:], start=1):
                         output_dict[cols[ii]].append(val)
+            print()
             codeparser.close()
         else:
             for idx, row in enumerate(c):
                 print('\rpost:', idx, end='')
                 for ii, val in enumerate(row):
                     output_dict[cols[ii]].append(val)
-        print()
+            print()
         return output_dict
 
     def _filter_posts(self, posts, post_ids, post_type):
-        ## Load lists from disk if given a path
+        # Load lists from disk if given a path
         if isinstance(posts, str):
             posts = load_text_list(posts)
         if isinstance(post_ids, str):
             post_ids = load_text_list(post_ids)
 
-        ## Create dump paths
+        # Create dump paths
         predictions_path = self.init_dfs[post_type] + '_predictions'
 
-        ## Vectorize posts and get classifier predictions
+        # Vectorize posts and get classifier predictions
         vectorized_doc = self.vectorizer.vectorize_list(posts)
         with open(predictions_path, 'a') as pred_out:
-            for batch in self.classifier.feed_data(vectorized_doc):
+            for batch in self.classifier.feed_data(vectorized_doc, verbose=1):
                 self.classifier.save_predictions(
-                    pred_out, self.classifier.make_prediction(batch))
+                    pred_out, self.classifier.make_prediction(batch, 0))
 
-        ## Filter out 'unclean' posts using the predictions
+        # Filter out 'unclean' posts using the predictions
         labels = load_number_list(predictions_path, mode='bool')
         df = pd.DataFrame(
             data={'Body': remove_rows(posts, labels)},
@@ -131,37 +136,45 @@ class CorpusBuilder:
         # Save dataframe to disk
         df.to_pickle(self.init_dfs[post_type])
 
-    def _build_initial_dataframe(self, query, post_type):
+    def _build_initial_dataframe(self, query, post_type, keep_raw_data=False):
         db_data = self._retrieve_db_data(query, post_type)
-        with open('temp_file_' + post_type, 'wb') as out:  ## safety save
-            pickle.dump(out, db_data)
+        if keep_raw_data:
+            export_path = os.path.join(self.temp_dir, 'raw_data_' + post_type)
+            with open(export_path, 'wb') as out:
+                pickle.dump(db_data, out)
+            print('Raw intermediate file saved at {}.'.format(export_path))
         if post_type != 'c':  # skip classifier stage for comments
             self._filter_posts(db_data['Body'], db_data['Id'], post_type)
-        elif post_type == 'c':
+        else:
             pd.DataFrame(
                 data={'Body': db_data['Body']},
                 index=db_data['Id']).to_pickle(self.init_dfs['c'])
 
     def _build_final_dataframe(self, query, post_type):
-        def validate_data(original_ids, data_ids):
-            if len(original_ids) != len(data_ids):
-                raise ValueError('Validation failed. Ids mismatch.')
-            for idx, _id in enumerate(original_ids):
-                if _id != data_ids[idx]:
-                    raise ValueError('Validation failed. Ids mismatch.')
+        def validate_data(original_ids, db_data):
+            if original_ids != db_data['Id']:
+                raise ValueError('Validation failed. Id mismatch.')
+            del db_data['Id']  # discard ids from dict
 
+        # Load initial dataframe (df_index: Ids)
         init_df = pd.read_pickle(self.init_dfs[post_type])
         df_index = list(init_df.index)
         df_dict = {'Body': list(init_df['Body'])}
-        del init_df
-        db_data = self._retrieve_db_data(query, post_type, False)
-        validate_data(df_index, db_data['Id']) # sanity check
-        del db_data['Id']
+
+        # Retrieve extra database info
+        db_data = self._retrieve_db_data(
+            query.format(id_list=str(tuple(df_index))), post_type, False)
+
+        # Ensure Id matching
+        validate_data(df_index, db_data)
+
+        # Update dataframe dict and save final dataframe to disk
         df_dict.update(db_data)
         final_df = pd.DataFrame(data=df_dict, index=df_index)
         final_df.to_pickle(self.final_dfs[post_type])
 
-    def build_initial_dataframes(self):
+    def build_initial_dataframes(self, qid_list=None, ansid_list=None):
+        print('Building initial dataframes.')
         query = INIT_QUESTION_QUERY.format(
             ans_count=ans_count_threshold, score=score_threshold)
         if self.qparams:
@@ -171,39 +184,68 @@ class CorpusBuilder:
         query = INIT_ANSWER_QUERY.format(id_list=str(tuple(self.qid_list)))
         self._build_initial_dataframe(query, 'a')
 
-        query = INIT_COMMENT_QUERY.format(
-            id_list=str(tuple(self.qid_list + self.ansid_list)))
+        com_postids = []
+        if qid_list and ansid_list:
+            com_postids = qid_list + ansid_list
+        else:
+            com_postids = self.qid_list + self.ansid_list
+
+        query = INIT_COMMENT_QUERY.format(id_list=str(tuple(com_postids)))
         self._build_initial_dataframe(query, 'c')
 
     def build_final_dataframes(self):
-        query = FINAL_QUESTION_QUERY.format(str(tuple(self.qid_list)))
-        self._build_final_dataframe(query, 'q')
-        query = FINAL_ANSWER_QUERY.format(str(tuple(self.ansid_list)))
-        self._build_final_dataframe(query, 'a')
-        query = FINAL_COMMENT_QUERY.format(
-            str(tuple(self.qid_list + self.ansid_list)))
-        self._build_final_dataframe(query, 'c')
+        print('Building final dataframes.')
+        self._build_final_dataframe(FINAL_QUESTION_QUERY, 'q')
+        self._build_final_dataframe(FINAL_ANSWER_QUERY, 'a')
+        self._build_final_dataframe(FINAL_COMMENT_QUERY, 'c')
 
-    def build_corpus(self, process=True):  ## TODO: include_comments=False,
+    def _build_init_corpus(self):
+        def progress(iterable, max_n=30):
+            n = len(iterable)
+            for index, element in enumerate(iterable):
+                j = (index + 1) / n
+                print(
+                    '\r[{:{}s}] {}%'.format('=' * int(max_n * j), max_n,
+                                            int(100 * j)),
+                    end='')
+                yield index, element
+            print()
+
         text_list = []
         qdf = pd.read_pickle(self.final_dfs['q'])
         qids = list(qdf.index)
         qposts = list(qdf['Body'])
         qtitles = list(qdf['Title'])
-        del qdf  # free memory
 
+        print('Building initial text corpus...')
         ansdf = pd.read_pickle(self.final_dfs['a'])
-        for idx, qid in enumerate(qids):
+        for idx, qid in progress(qids):
             text_list.append(qtitles[idx])
             text_list.append(qposts[idx])
             text_list.extend(list(ansdf.loc[ansdf['ParentId'] == qid, 'Body']))
 
-        corpus_path = os.path.join(self.export_dir, 'init_corpus')
-        list_to_disk(corpus_path, text_list)
+        print('Saving initial text corpus to disk...')
+        init_corpus = os.path.join(self.export_dir, 'init_corpus')
+        list_to_disk(init_corpus, text_list)
+        return init_corpus
 
-        if process:
-            final_corpus_path = os.path.join(self.export_dir, 'final_corpus')
-            process_corpus(corpus_path, final_corpus_path, True)
+    ## TODO: include_comments=False
+    def build_corpus(self,
+                     init_corpus=None,
+                     filter_corpus=True,
+                     token_fn='norm'):
+        """
+        """
+
+        if not init_corpus:
+            init_corpus = self._build_init_corpus()
+
+        final_corpus = os.path.join(self.export_dir, 'final_corpus_')
+        final_corpus = final_corpus + token_fn
+        if token_fn == 'norm':
+            process_corpus(init_corpus, final_corpus, filter_corpus, token_fn)
+        elif token_fn == 'lemma':
+            process_corpus(init_corpus, final_corpus, filter_corpus, token_fn)
 
 
 def main(classifier_path,
@@ -216,12 +258,13 @@ def main(classifier_path,
     corpus_builder = CorpusBuilder(classifier_path, vectorizer_dict_path,
                                    database_path, export_dir, text_eval_fn,
                                    qparams)
+
     corpus_builder.build_initial_dataframes()
     corpus_builder.build_final_dataframes()
     corpus_builder.build_corpus()
 
 
 if __name__ == '__main__':
-    main('classifier/models/c-lstm_v1.0.hdf5',
-         'classifier/data/token_dictionary.json', 'database/javaposts.db',
+    main('post_classifier/models/c-lstm_v1.0.hdf5',
+         'post_classifier/data/token_dictionary.json', 'database/javaposts.db',
          'data', eval_text)

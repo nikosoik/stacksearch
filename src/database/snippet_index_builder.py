@@ -12,14 +12,15 @@ from bs4 import BeautifulSoup
 file_path = os.path.dirname(os.path.realpath(__file__))
 sys.path.append('..')
 
-from code_parser.codeparser import CodeParser
+from code_parser.codeparser_socket import CodeParserSocket
+from code_parser.codeparser import ERROR_MESSAGE, EMPTY_MESSAGE
 
-## Stack Overflow Attribution
+# Stack Overflow Attribution
 so_attr = 'Code extracted from Stack Overflow'
 user_attr = 'User: https://stackoverflow.com/users/'
 post_attr = '\nPost: https://stackoverflow.com/questions/'
 
-## Query
+# Query
 QID_INDEX = 0
 ANSID_INDEX = 1
 BODY_INDEX = 2
@@ -43,52 +44,41 @@ SnippetCount, Snippets, FavoriteCount, ViewCount, AnswerCount,
 CommentCount, OwnerUserId, CreationDate, LastEditDate'''
 
 
-def extract_code_snippets(row, codeparser, token_file=None, tag_name='code'):
+def extract_code_snippets(row, codeparser, tag_name='code'):
     snippet_list = []
-    snippet_count = 0
     soup = BeautifulSoup(row[BODY_INDEX], 'lxml')
     for tag_html in soup.find_all(tag_name):
         tag_text = tag_html.get_text().strip()
         if tag_text != '':
-            api_tokens = codeparser.tokenize_sequence(
-                tag_text, unique_tokens=True)
-            if len(api_tokens) > 0:
-                if token_file:
-                    token_file.write(
-                        ', '.join([str(row[QID_INDEX])] + api_tokens) + '\n')
-                snippet_count += 1
+            code_snippet = codeparser.parse_code(tag_text,
+                                                 row[QID_INDEX]).strip()
+            if code_snippet != EMPTY_MESSAGE and code_snippet != ERROR_MESSAGE:
                 snippet_list.append(tag_text)
-    if snippet_count > 0:
+    if len(snippet_list) > 0:
         attr = ''.join([post_attr, str(row[ANSID_INDEX])])
         snippet_str = ''.join([
             attr, '\n##Score {}\n'.format(row[SCORE_INDEX]),
             '<_code_>'.join(snippet_list)
         ])
-        return snippet_count, snippet_str
+        return len(snippet_list), snippet_str
     return 0, ''
 
 
-def build_snippet_index(db_path, save_api_tokens):
-    token_file = None
-    if save_api_tokens:
-        token_file = open('api_tokens.out', 'w')
-
-    codeparser = CodeParser(
-        extract_sequence=True,
+def build_snippet_index(db_path):
+    codeparser = CodeParserSocket(
+        extract_sequence=False,
         keep_imports=False,
         keep_comments=False,
-        keep_literals=True,
-        keep_unknown_method_calls=False)
+        keep_literals=True)
 
     c = sqlite3.connect(db_path).cursor()
     max_rows = c.execute('SELECT COUNT(*) FROM answers').fetchone()[0]
     c.execute(ans_query)
     question_dict = OrderedDict()
     for idx, row in enumerate(c):
-        print('\rrow:', idx, '/', max_rows, end=' _ ')
+        print('\rrow:', idx, '/', max_rows, end='')
         qid = row[QID_INDEX]
-        snippet_count, snippet_str = extract_code_snippets(
-            row, codeparser, token_file)
+        snippet_count, snippet_str = extract_code_snippets(row, codeparser)
         if qid not in question_dict:
             question_dict[qid] = {
                 'SnippetCount': snippet_count,
@@ -96,16 +86,18 @@ def build_snippet_index(db_path, save_api_tokens):
             }
         else:
             if snippet_count > 0:
+                new_str = None
                 new_count = question_dict[qid]['SnippetCount'] + snippet_count
                 new_str = '<_post_>'.join(
-                    [question_dict[qid]['Snippets'], snippet_str])
+                        [question_dict[qid]['Snippets'], snippet_str])
+                # Remove starting <_post_> delimeter for the first empty string
+                new_str = re.sub(r'^<_code_>', r'', new_str)
                 question_dict[qid] = {
                     'SnippetCount': new_count,
                     'Snippets': new_str
                 }
     codeparser.close()
-    if token_file is not None:
-        token_file.close()
+
     return OrderedDict(sorted(question_dict.items()))
 
 
@@ -113,9 +105,9 @@ def insert_snippet_data(db_path, snippet_df):
     db = sqlite3.connect(db_path)
     src_c = db.cursor()
     des_c = db.cursor()
-    ## Alter questions table name
+    # Alter questions table name
     src_c.execute('ALTER TABLE questions RENAME TO old_questions')
-    ## Create new questions table with two extra columns {SnippetCount, Snippets}
+    # Create new questions table with two extra columns {SnippetCount, Snippets}
     src_c.execute(new_qtable)
     db.commit()
     src_c.execute(
@@ -144,12 +136,12 @@ def insert_snippet_data(db_path, snippet_df):
     print('\nValues inserted...')
 
 
-def main(db_path, snippet_df_path=None, save_api_tokens=True):
+def main(db_path, snippet_df_path=None):
     snippet_df = None
     if not snippet_df_path:
         print('Creating snippet index...')
         snippet_df = pd.DataFrame.from_dict(
-            build_snippet_index(db_path, save_api_tokens), orient='index')
+            build_snippet_index(db_path), orient='index')
         snippet_df.to_pickle('snippet_index.pkl')
     else:
         print('Loading snippet index...')
@@ -159,4 +151,4 @@ def main(db_path, snippet_df_path=None, save_api_tokens=True):
 
 
 if __name__ == '__main__':
-    main('javaposts.db')  #, 'snippet_index.pkl')
+    main('javaposts.db')  # , 'snippet_index.pkl')

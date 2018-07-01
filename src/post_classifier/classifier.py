@@ -1,6 +1,10 @@
 import os
 import sys
+import datetime
+from timeit import default_timer as timer
+
 import numpy as np
+
 from keras.layers import LSTM
 from keras.layers import Dense
 from keras.models import load_model
@@ -17,9 +21,12 @@ from sklearn.model_selection import cross_val_score
 sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 from metrics import f1, precision, recall
 
-# folders
+## Folders
 vec_folder = 'training_data/vec_data/'
 model_folder = 'models/'
+
+## Filter out INFO, WARNING logging in Tensorflow backend
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 
 class PostClassifier:
@@ -57,20 +64,44 @@ class PostClassifier:
                   data_matrix,
                   ntop_tokens=12000,
                   max_length=4000,
-                  batch_size=6000):
+                  batch_size=6000,
+                  verbose=0):
         """
         Utility function to feed data into the prediction system.
         In case the rows of the data matrix is bigger than batch_size the matrix
         is split into batches in order to conserve memory during the prediction
         process.
         """
+
+        def progress(iterable, max_n=30, verbose=0):
+            n = len(iterable)
+            for index, element in enumerate(iterable):
+                if verbose:
+                    j = (index + 1) / n
+                    print(
+                        '\r[{:{}s}] {}%'.format('=' * int(max_n * j), max_n,
+                                                int(100 * j)),
+                        end='  ')
+                    print(str(index + 1) + '/' + str(n), end='  ')
+                    stime = timer()
+                    yield index, element
+                    print(
+                        ' ETA:',
+                        datetime.timedelta(
+                            seconds=((n - index - 1) * (timer() - stime))),
+                        end='')
+                else:
+                    yield index, element
+            if verbose:
+                print()
+
         nrows = len(data_matrix)
         n_batches = 1
         if nrows > batch_size:
             n_batches = round(nrows / batch_size)
             print('Batches:', n_batches)
         data_matrix = np.array_split(data_matrix, n_batches)
-        for batch in data_matrix:
+        for ii, batch in progress(data_matrix, verbose=verbose):
             yield self.process_vecs(batch, ntop_tokens, max_length)
 
     def make_prediction(self, data_matrix, verbose=1):
@@ -83,9 +114,7 @@ class PostClassifier:
                 data_matrix, batch_size=128, verbose=verbose)
             return predictions.round()
         else:
-            print(
-                'Initialize class with model path to use the prediction functionality'
-            )
+            raise ValueError('Classifier model path unknown.')
 
     def save_predictions(self, output_path, predictions):
         predictions = predictions.round()

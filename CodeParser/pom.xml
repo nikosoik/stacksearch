@@ -6,7 +6,7 @@
 
     <groupId>com.github.nikosoik</groupId>
     <artifactId>CodeParser</artifactId>
-    <version>0.1.5</version>
+    <version>0.4</version>
     
     <properties>
         <!-- Use Java 9 -->
@@ -17,18 +17,17 @@
     
     <dependencies>
         <dependency>
-            <groupId>com.github.javaparser</groupId>
-            <artifactId>javaparser-core</artifactId>
-            <version>3.6.3</version>
+            <groupId>org.eclipse.jdt</groupId>
+            <artifactId>org.eclipse.jdt.core</artifactId>
+            <version>3.13.102</version>
         </dependency>
         <dependency>
             <groupId>com.github.javaparser</groupId>
-            <artifactId>javaparser-symbol-solver-core</artifactId>
-            <version>3.6.3</version>
+            <artifactId>javaparser-core</artifactId>
+            <version>3.6.6</version>
         </dependency>
     </dependencies>
     <build>
-        <sourceDirectory>src</sourceDirectory>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -49,13 +48,6 @@
                         </configuration>
                     </execution>
                 </executions>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <mainClass>PyCodeParser</mainClass>
-                        </manifest>
-                    </archive>
-                </configuration>
             </plugin>
         </plugins>
     </build>
