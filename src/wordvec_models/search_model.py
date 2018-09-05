@@ -20,7 +20,6 @@ cw_type_error = '"custom_weights" variable must be of type ndarray.'
 
 ## Presenter Strings
 code_div = '################################# CODE #################################'
-clear_screen_seq = subprocess.check_output('clear')
 
 
 class BaseSearchModel:
@@ -162,7 +161,7 @@ class BaseSearchModel:
         return pd.DataFrame(df_dict)
 
     def presenter(self, df, num_results):
-        def clear():
+        def clear_screen():
             print(chr(27) + '[2J')
             print(chr(27) + "[1;1f")
 
@@ -177,7 +176,7 @@ class BaseSearchModel:
             print('Answer score: %d' % item['sdict']['score'])
             print('Snippets for this post: %d' % item['SnippetCount'])
 
-        clear()
+        clear_screen()
         print_item(df.iloc[0], 0, num_results)
 
         for ii, row in enumerate(df.iterrows()):
@@ -187,13 +186,13 @@ class BaseSearchModel:
                 action = input(
                     'Action (enter for next snippet, or \'exit\' for new query): '
                 )
-                clear()
+                clear_screen()
                 if action == 'exit':
                     break
 
                 print_item(item, ii, num_results)
 
-        clear()
+        clear_screen()
 
     def search(self,
                num_results=20,

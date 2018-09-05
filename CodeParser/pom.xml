@@ -9,9 +9,9 @@
     <version>0.4</version>
     
     <properties>
-        <!-- Use Java 9 -->
-        <maven.compiler.source>1.9</maven.compiler.source>
-        <maven.compiler.target>1.9</maven.compiler.target>
+        <!-- Use Java 10 -->
+        <maven.compiler.source>10</maven.compiler.source>
+        <maven.compiler.target>10</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     
@@ -24,7 +24,7 @@
         <dependency>
             <groupId>com.github.javaparser</groupId>
             <artifactId>javaparser-core</artifactId>
-            <version>3.6.6</version>
+            <version>3.6.15</version>
         </dependency>
     </dependencies>
     <build>

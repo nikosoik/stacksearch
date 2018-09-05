@@ -1,0 +1,144 @@
+/* General Rules */
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background: #FAFAFA;
+}
+
+* {
+    border-radius: 0 !important;
+}
+
+a {
+    color: #343a40;
+}
+
+a:hover {
+    color: #000000;
+}
+
+/* Section, Panel Rules */
+
+#main {
+    height: 100%;
+    margin: 0;
+    padding: .3125rem;
+}
+
+#search-panel {
+    margin: 0 0.3125rem 0 0;
+    padding: 3rem 2rem;
+}
+
+#content-panel {
+    background: #fff;
+}
+
+#tag-container {
+}
+
+/* Custom Element Rules */
+
+.entity-tag {
+    display: inline-block;
+    padding: 0.4em 0.5em;
+    margin: 0 0.125rem 0.125rem 0;
+    font-size: 1rem;
+    line-height: 1;
+    white-space: nowrap;
+    text-decoration: none;
+    text-align: center;
+    border-width: .0625rem;
+    border-style: solid;
+    transition: all .15s ease-in-out;
+}
+
+.entity-tag > .fa-close {
+    padding-left: .5rem;
+    cursor: pointer;
+}
+
+#entity-vals {
+    width: 0;
+    height: 0;
+    padding: 0;
+    margin: 0;
+    border: 0;
+}
+
+.title-container {
+    display: inline-block;
+    margin-bottom: 3rem;
+}
+
+.title-banner {
+    font-size: 2rem;
+    color: #343a40;
+}
+
+.title-banner:after {
+    display: block;
+    content: " ";
+    width: 6.25rem;
+    height: .25rem;
+    background: #343a40;
+    margin-top: .625rem;
+    border-radius: .3125rem;
+    margin-left: auto;
+    margin-right: auto
+}
+
+.note {
+    width: 100%;
+    background: #fff;
+    padding: .375rem .75rem;
+    border-left: .48rem solid #DC3545;
+    text-align: start;
+    font-size: 1rem;
+}
+
+/**
+### Override Bootstrap Properties ###
+**/
+.form-control:focus {
+    color: #495057;
+    background-color: #fff;
+    border-color: #343a40;
+    outline: 0;
+    box-shadow: 0 0 0 0.0625rem rgba(52, 58, 64, .5);
+}
+
+.btn-dark:focus, .btn-dark.focus{
+    box-shadow: 0 0 0 0.0625rem rgba(52, 58, 64, .5);
+}
+
+.btn-dark:not(:disabled):not(.disabled):active:focus, .btn-dark:not(:disabled):not(.disabled).active:focus,
+.show > .btn-dark.dropdown-toggle:focus {
+    box-shadow: 0 0 0 0.125rem rgba(52, 58, 64, .5);
+}
+
+.custom-select:focus {
+    border-color: #343a40;
+    outline: 0;
+    box-shadow: 0 0 0 0.0625rem rgba(52, 58, 64, .5);
+}
+
+.close {
+    float: right;
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1;
+    text-shadow: 0 1px 0 #fff;
+    opacity: .5;
+}
+
+.close:not(:disabled):not(.disabled) {
+    cursor: pointer;
+}
+
+.close:not(:disabled):not(.disabled):hover, .close:not(:disabled):not(.disabled):focus {
+    text-decoration: none;
+    opacity: .75;
+}
