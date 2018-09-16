@@ -71,8 +71,6 @@ class IndexBuilder:
         return index_ids, index_dataset
 
     def build_metadata_index(self, qids, query):
-        # TODO: run snippet_index_builder on new javaposts.db and remove
-        # case of first post being empty string after split
         def split_snippets(snippet_str):
             if snippet_str == '':
                 return []
@@ -104,8 +102,9 @@ class IndexBuilder:
                 'Score': row[1],
                 'Title': row[2],
                 'Tags': row[3][1:-1].replace('><', ' ').split(),
-                'SnippetCount': row[4],
-                'Snippets': split_snippets(row[5])
+                'Entities': row[4].split('<_ent_>'),
+                'SnippetCount': row[5],
+                'Snippets': split_snippets(row[6])
             }
             metadata.append(str_out)
 
@@ -118,11 +117,22 @@ class IndexBuilder:
         def split_tags(tagstring_list):
             taglist_list = []
             for row in list(tagstring_list):
-                taglist_list.append(' '.join(
-                    [tag for tag in row if tag != 'java']))
+                taglist_list.append(' '.join([
+                    tag for tag in row[1:-1].replace('><', ' ').split()
+                    if tag != 'java'
+                ]))
             if len(taglist_list) == 0:
-                taglist_list.append('unk')
+                taglist_list.append('<unk>')
             return taglist_list
+
+        def split_entities(entstring_list):
+            entlist_list = []
+            for row in list(entlist_list):
+                entlist_list.append(' '.join(
+                    [ent for ent in row.split('<_ent_>')]))
+            if len(entlist_list) == 0:
+                entlist_list.append('<unk>')
+            return entlist_list
 
         def build_dict(index_dataset, model_path, load_model_fn, build_vecs_fn,
                        keys):
@@ -132,6 +142,8 @@ class IndexBuilder:
                 key_text_list = []
                 if key == 'Tags':
                     key_text_list = split_tags(index_dataset[key])
+                elif key == 'Entities':
+                    key_text_list = split_entities(index_dataset[key])
                 else:
                     key_text_list = list(index_dataset[key])
                 search_index[key + 'V'] = build_vecs_fn(model, key_text_list)
@@ -163,6 +175,7 @@ class IndexBuilder:
     def build_index(self,
                     index_query,
                     metadata_query,
+                    index_keys=['Title', 'Body', 'Tags', 'Entities'],
                     processed_dataset=None,
                     build_metadata=True,
                     build_dataset=True,
@@ -170,9 +183,9 @@ class IndexBuilder:
                     build_tfidf_index=True,
                     build_glove_index=True,
                     build_wv_index=True):
-        def build_init_index_dataset(index_query):
+        def build_init_index_dataset(index_query, keys):
             qids = frozenset(self._fetch_qids(index_query))
-            return self._build_index_dataset(qids)
+            return self._build_index_dataset(qids, keys)
 
         def load_processed_index_dataset(index_dataset,
                                          body_corpus=None,
@@ -212,7 +225,7 @@ class IndexBuilder:
         if build_dataset:
             if index_dataset is None:
                 index_ids, index_dataset = build_init_index_dataset(
-                    index_query)
+                    index_query, index_keys)
             # Dump question bodies & titles to disk and process each corpus
             print('Processing body & title corpora...')
             self._dump_text_list(bcorpus, index_dataset['Body'])
@@ -250,15 +263,15 @@ class IndexBuilder:
 
         if build_ft_index:
             print('Building fasttext search index...')
-            self.build_search_index(index_dataset, 'ft')
+            self.build_search_index(index_dataset, 'ft', index_keys)
 
         if build_tfidf_index:
             print('Building tfidf search index...')
-            self.build_search_index(index_dataset, 'tfidf')
+            self.build_search_index(index_dataset, 'tfidf', index_keys)
 
         if build_glove_index:
             print('Building GloVe search index...')
-            self.build_search_index(index_dataset, 'glove')
+            self.build_search_index(index_dataset, 'glove', index_keys)
 
         if build_wv_index:
             print('Exporting word vector index...')
@@ -283,16 +296,16 @@ def main(question_dataframe, database_path, fasttext_model_path,
         metadata_query=metadata_query,
         processed_dataset=index_dataset,
         build_metadata=False,
-        build_dataset=False,
+        build_dataset=True,
         build_ft_index=True,
-        build_tfidf_index=False,
+        build_tfidf_index=True,
         build_glove_index=False,
-        build_wv_index=False)
+        build_wv_index=True)
 
 
 if __name__ == '__main__':
     QID_QUERY = "SELECT Id FROM questions WHERE AcceptedAnswerId NOT NULL AND Score>=1 AND AnswerCount>=1 AND SnippetCount>=1 ORDER BY Id"
-    METADATA_QUERY = "SELECT Id, Score, Title, Tags, SnippetCount, Snippets FROM questions WHERE Id IN {id_list} ORDER BY Id"
+    METADATA_QUERY = "SELECT Id, Score, Title, Tags, Entities, SnippetCount, Snippets FROM questions WHERE Id IN {id_list} ORDER BY Id"
     main('data/final_q_posts', 'database/javaposts.db',
          'wordvec_models/fasttext_archive/ft_v0.6.1.bin',
          'wordvec_models/tfidf_archive/tfidf_v0.3.pkl',
