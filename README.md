@@ -1,4 +1,4 @@
-# StackSearch
+# StackSearch [![Python 3.6](https://img.shields.io/badge/python-3.6+-blue.svg)](https://www.python.org/downloads/release/python-360/) [![License](https://img.shields.io/github/license/nikosoik/stacksearch)](https://github.com/nikosoik/stacksearch/blob/master/LICENSE)
 
 RSSE implementation using crowd-sourced data from Stack Overflow.  
 
