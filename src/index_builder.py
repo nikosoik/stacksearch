@@ -4,11 +4,13 @@ import os
 import sys
 import json
 import pickle
+import pprint
 import sqlite3
+import argparse
 
 import numpy as np
 import pandas as pd
-from fastText import load_model as load_ft_model
+from fasttext import load_model as load_ft_model
 
 from text_processing.utils import process_corpus
 from wordvec_models.fasttext_model import build_doc_vectors as build_ft_vecs
@@ -18,6 +20,9 @@ from wordvec_models.tfidf_model import load_tfidf_model
 import wordvec_models.glove_model
 from wordvec_models.glove_model import build_doc_vectors as build_glove_vecs
 from wordvec_models.glove_model import GloVeModel, load_glove_model
+
+QID_QUERY = "SELECT Id FROM questions WHERE {} ORDER BY Id"
+METADATA_QUERY = "SELECT {} FROM questions WHERE Id IN {{id_list}} ORDER BY Id"
 
 
 class IndexBuilder:
@@ -71,50 +76,68 @@ class IndexBuilder:
         return index_ids, index_dataset
 
     def build_metadata_index(self, qids, query):
-        # TODO: run snippet_index_builder on new javaposts.db and remove
-        # case of first post being empty string after split
         def split_snippets(snippet_str):
             if snippet_str == '':
                 return []
-            snippet_list = snippet_str.split('<_post_>')
-            if len(snippet_list) == 1:
-                return snippet_list
-            else:
-                return snippet_list[1:]
+            return snippet_str.split('<_post_>')
 
         def progress(iterable, max_items, max_n=30):
             n = max_items
             for index, element in enumerate(iterable):
                 j = (index + 1) / n
-                print(
-                    '\r[{:{}s}] {}%'.format('=' * int(max_n * j), max_n,
-                                            int(100 * j)),
-                    end='')
+                print('\r[{:{}s}] {}%'.format('=' * int(max_n * j), max_n,
+                                              int(100 * j)),
+                      end='')
                 yield index, element
             print()
 
         metadata = []
+        etags_list = []
         db_conn = sqlite3.connect(self.database_path)
         c = db_conn.cursor()
         c.execute(query.format(id_list=str(tuple(qids))))
         max_items = len(qids)
         for _, row in progress(c, max_items):
+            ents = row[4].split('<_ent_>')
+            etags = set(row[3][1:-1].replace('><', ' ').split() + ents)
+            etags = list(filter(bool, etags))
+            etags_list.extend(etags)
             str_out = {
                 'PostId': row[0],
                 'Score': row[1],
                 'Title': row[2],
-                'Tags': row[3][1:-1].replace('><', ' ').split(),
-                'SnippetCount': row[4],
-                'Snippets': split_snippets(row[5])
+                'ETags': etags,
+                'SnippetCount': row[5],
+                'Snippets': split_snippets(row[6])
             }
             metadata.append(str_out)
 
         with open(os.path.join(self.export_dir, 'metadata.json'), 'w') as out:
             json.dump(metadata, out, indent=2)
 
-    def build_search_index(self, index_dataset, model, keys=['Title', 'Body']):
-        """Placeholder"""
+        # Reverse etags lookup
+        print('Building reverse ETags lookup (ETags: [Tags, Entities])...')
+        etag_lookup = {}
+        etags_list = list(set(etags_list))
+        max_items = len(etags_list)
+        for _, etag in progress(etags_list, max_items):
+            # etag: indices of metadata entries
+            metadata_entry_indices = []
+            for ii, entry in enumerate(metadata):
+                if etag in entry['ETags']:
+                    metadata_entry_indices.append(ii)
+            etag_lookup[etag] = metadata_entry_indices
 
+        with open(os.path.join(self.export_dir, 'etags.json'), 'w') as out:
+            json.dump(etag_lookup, out, indent=2)
+
+        # Extended metadata filepath
+        filepath = os.path.join(self.export_dir, 'extended_metadata.pkl')
+        with open(filepath, 'wb') as out:
+            ext_metadata = {'etag_lookup': etag_lookup, 'metadata': metadata}
+            pickle.dump(ext_metadata, out)
+
+    def build_search_index(self, index_dataset, model, keys=['Title', 'Body']):
         def split_tags(tagstring_list):
             taglist_list = []
             for row in list(tagstring_list):
@@ -143,17 +166,20 @@ class IndexBuilder:
         output_path = None
         output_dict = None
         if model == 'ft':
-            output_path, output_dict = build_dict(
-                index_dataset, self.fasttext_path, load_ft_model,
-                build_ft_vecs, keys)
+            output_path, output_dict = build_dict(index_dataset,
+                                                  self.fasttext_path,
+                                                  load_ft_model, build_ft_vecs,
+                                                  keys)
         elif model == 'tfidf':
-            output_path, output_dict = build_dict(
-                index_dataset, self.tfidf_path, load_tfidf_model,
-                build_tfidf_vecs, keys)
+            output_path, output_dict = build_dict(index_dataset,
+                                                  self.tfidf_path,
+                                                  load_tfidf_model,
+                                                  build_tfidf_vecs, keys)
         elif model == 'glove':
-            output_path, output_dict = build_dict(
-                index_dataset, self.glove_path, load_glove_model,
-                build_glove_vecs, keys)
+            output_path, output_dict = build_dict(index_dataset,
+                                                  self.glove_path,
+                                                  load_glove_model,
+                                                  build_glove_vecs, keys)
         else:
             raise ValueError('Unknown model type {}.'.format(model))
 
@@ -163,7 +189,7 @@ class IndexBuilder:
     def build_index(self,
                     index_query,
                     metadata_query,
-                    processed_dataset=None,
+                    processed_dataset_path=None,
                     build_metadata=True,
                     build_dataset=True,
                     build_ft_index=True,
@@ -236,15 +262,15 @@ class IndexBuilder:
                                        'data/index_dataset.pkl')
             if not os.path.exists(os.path.dirname(idataset_df)):
                 os.makedirs(os.path.dirname(idataset_df))
-            pd.DataFrame(
-                data=index_dataset, index=index_ids).to_pickle(idataset_df)
+            pd.DataFrame(data=index_dataset,
+                         index=index_ids).to_pickle(idataset_df)
 
         # Load processed index from disk to build ft or tfidf search index
         if index_dataset is None or not dataset_processed:
             if build_ft_index or build_tfidf_index or build_glove_index:
-                if processed_dataset:
+                if processed_dataset_path:
                     index_dataset = load_processed_index_dataset(
-                        processed_dataset)
+                        processed_dataset_path)
                 else:
                     raise Exception('Index dataset required')
 
@@ -266,36 +292,76 @@ class IndexBuilder:
 
 
 def main(question_dataframe, database_path, fasttext_model_path,
-         tfidf_model_path, glove_index_path, index_dataset, temp_dir,
-         export_dir, index_qids_query, metadata_query):
+         tfidf_model_path, glove_index_path, temp_dir, export_dir,
+         index_qids_query, metadata_query, index_dataset, build_options):
 
-    indexbuilder = IndexBuilder(
-        qdataframe_path=question_dataframe,
-        database_path=database_path,
-        fasttext_path=fasttext_model_path,
-        tfidf_path=tfidf_model_path,
-        glove_path=glove_index_path,
-        temp_dir=temp_dir,
-        export_dir=export_dir)
+    indexbuilder = IndexBuilder(qdataframe_path=question_dataframe,
+                                database_path=database_path,
+                                fasttext_path=fasttext_model_path,
+                                tfidf_path=tfidf_model_path,
+                                glove_path=glove_index_path,
+                                temp_dir=temp_dir,
+                                export_dir=export_dir)
 
-    indexbuilder.build_index(
-        index_query=index_qids_query,
-        metadata_query=metadata_query,
-        processed_dataset=index_dataset,
-        build_metadata=False,
-        build_dataset=False,
-        build_ft_index=True,
-        build_tfidf_index=False,
-        build_glove_index=False,
-        build_wv_index=False)
+    indexbuilder.build_index(index_query=index_qids_query,
+                             metadata_query=metadata_query,
+                             processed_dataset_path=index_dataset,
+                             **build_options)
+
+
+def param_parser(params_filepath):
+    params = {
+        'question_dataframe': None,
+        'database_path': None,
+        'fasttext_model_path': None,
+        'tfidf_model_path': None,
+        'glove_index_path': None,
+        'temp_dir': None,
+        'export_dir': None,
+        'index_qids_query': None,
+        'metadata_query': None,
+        'index_dataset': None,
+        'build_options': None
+    }
+
+    with open(params_filepath, 'r') as _in:
+        params_dict = json.load(_in)
+
+    params['question_dataframe'] = params_dict['index']['question_dataframe']
+    params['database_path'] = params_dict['database_path']
+    params['fasttext_model_path'] = params_dict['fasttext_model']
+    params['tfidf_model_path'] = params_dict['tfidf_model']
+    params['glove_index_path'] = params_dict['glove_index']
+    params['temp_dir'] = params_dict['index']['temp_dir']
+    params['export_dir'] = params_dict['index']['export_dir']
+    params['index_qids_query'] = QID_QUERY.format(' AND '.join(
+        params_dict['index']['qid_conditions']))
+    params['metadata_query'] = METADATA_QUERY.format(', '.join(
+        params_dict['index']['metadata_cols']))
+    params['index_dataset'] = params_dict['index']['index_dataset']
+    params['build_options'] = params_dict['index']['build_options']
+
+    return params
+
+
+def validate_file(filepath):
+    if not os.path.exists(filepath):
+        print('File "{}" does not exist.'.format(filepath))
+        exit()
 
 
 if __name__ == '__main__':
-    QID_QUERY = "SELECT Id FROM questions WHERE AcceptedAnswerId NOT NULL AND Score>=1 AND AnswerCount>=1 AND SnippetCount>=1 ORDER BY Id"
-    METADATA_QUERY = "SELECT Id, Score, Title, Tags, SnippetCount, Snippets FROM questions WHERE Id IN {id_list} ORDER BY Id"
-    main('data/final_q_posts', 'database/javaposts.db',
-         'wordvec_models/fasttext_archive/ft_v0.6.1.bin',
-         'wordvec_models/tfidf_archive/tfidf_v0.3.pkl',
-         'wordvec_models/glove_archive/glove_v0.1.1.pkl',
-         'wordvec_models/index/data/index_dataset.pkl', 'temp_files',
-         'wordvec_models/index', QID_QUERY, METADATA_QUERY)
+    parser = argparse.ArgumentParser(description='Index/Metadata builder.')
+    parser.add_argument(
+        '-p',
+        '--params',
+        default='params.json',
+        help='Path to a valid params file. (default: params.json)')
+
+    args = parser.parse_args()
+    validate_file(args.params)
+
+    p = param_parser(args.params)
+    print('Index build options:')
+    pprint.pprint(p['build_options'])
+    main(**p)

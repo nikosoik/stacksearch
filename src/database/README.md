@@ -1,4 +1,18 @@
-﻿ - Format: 7zipped
+﻿# Database
+
+## Scripts
+
+`database_builder.py`: Builds a database (sqlite) using the StackOverflow data dump (xml format) for accessibility and utility purposes.
+`snippet_index_builder.py`: Extracts code snippets from question & answer post bodies. Rebuilds the sqlite database inserting the new 'SnippetCount' 'Snippets' columns.
+`ner_script.py`: Extracts entities from question & answer post bodies using a trained crf model. Rebuilds the sqlite database inserting the 'Entities' column in 'questions' table.
+`api_token_extraction.py`: Extracts API calls from code snippets found in answer post bodies and builds a list. Used for stats and visualization.
+`token_stats.py`: Creates a frequency based list of tokens using the post sentence dictionary created by the `ner_script.py`.
+
+## StackOverflow Data Dump
+
+Data provided in xml format and structure is seen bellow.
+
+ - Format: 7zipped
  - Files:
    - **badges**.xml
        - UserId, e.g.: "420"

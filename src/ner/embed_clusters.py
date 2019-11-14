@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 from sklearn.cluster import KMeans, MiniBatchKMeans
 
-from fastText import load_model
+from fasttext import load_model
 
 
 class EmbeddingClusterer:

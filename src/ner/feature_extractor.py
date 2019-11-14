@@ -7,7 +7,7 @@ from collections import OrderedDict
 import pandas as pd
 from sklearn.cluster import MiniBatchKMeans
 
-from fastText import load_model
+from fasttext import load_model
 
 ## Template Features
 orth = [

@@ -83,7 +83,7 @@ _var = [r'\d+%$']
 
 
 def get_custom_tokenizer(disable=['tagger', 'parser', 'ner']):
-    nlp = spacy.load('en', disable=disable)
+    nlp = spacy.load('en_core_web_sm', disable=disable)
     nlp.tokenizer = custom_tokenizer(nlp)
     add_custom_properties(nlp)
     return nlp
@@ -125,9 +125,10 @@ def add_custom_properties(nlp):
     # Replace weird behavior when normalizing ('a' -> 'going to' to 'a' -> 'a')
     special_case = [{ORTH: u'a', NORM: u'a'}]
     nlp.tokenizer.add_special_case(u'a', special_case)
-    special_case = [{ORTH: u'is', NORM: u'is'}]
     # Naive replacement of "'s" as "is" (could indicate possession)
+    special_case = [{ORTH: u'is', NORM: u'is'}]
     nlp.tokenizer.add_special_case(u"'s", special_case)
+    # Avoid ('am' -> 'a.m.')
     special_case = [{ORTH: u'am', NORM: u'am'}]
     nlp.tokenizer.add_special_case(u"am", special_case)
 
@@ -153,13 +154,11 @@ if __name__ == '__main__':
     if(time && 0){do this;} #hello invalid#hashtag#seq @jvx @Warning at 20:21  .NET Java/.Net''',  # APIs
         '''In Java, the 'int' type is a primitive , whereas the 'Integer' type is an object. In C#, the 'int' type is 
     the same as System.Int32 and is a value type (i.e. more like the java 'int'). An integer (just like any other 
-    value types) can be boxed ("wrapped") into an object. I've had numerous object's attribute I didn't isn't I've got this can't ca''',  # Text
+    value types) can be boxed ("wrapped") into an object. I've had numerous object's attributes I didn't isn't I've got this can't ca''',  # Text
         '''https://www.google.com/search?q=i%20like%20gizmodo&rct=j?te&rm=what+is+this%3F&public=true 
     http://myjasperserverurl/jasperserver/rest_v2/reports/TestDir/TestReport.pdf?j_username=x&j_password=xxx&PARAMETER1=9734&PARAMETER2G21. 
     https://hello-world.com/q?:st/url.html https://spacy.io/ http://try.com/this/ test-site.com testmail@ece.auth.gr 
-    testmail@hotmail.com file:/aaa/bbb/ccc_20150310235959999.html'''
-
-        # URLs
+    testmail@hotmail.com file:/aaa/bbb/ccc_20150310235959999.html''' # URLs
     ]
 
     tests_res = [
@@ -173,7 +172,7 @@ if __name__ == '__main__':
     null equals null equals not null if time do this #hello invalid #hashtag #seq @jvx @warning at .net java .net''',
         '''in java the int type is a primitive whereas the integer type is an object in c# the int type is 
     the same as system.int32 and is a value type i.e. more like the java int an integer just like any other 
-    value types can be boxed wrapped into an object i have have numerous object is attribute i do not is not i have got this can not can''',
+    value types can be boxed wrapped into an object i have have numerous object is attributes i do not is not i have got this can not can''',
         '''https://www.google.com/search?q=i%20like%20gizmodo&rct=j?te&rm=what+is+this%3f&public=true 
     http://myjasperserverurl/jasperserver/rest_v2/reports/testdir/testreport.pdf?j_username=x&j_password=xxx&parameter1=9734&parameter2g21. 
     https://hello-world.com/q?:st/url.html https://spacy.io/ http://try.com/this/ 
@@ -181,6 +180,7 @@ if __name__ == '__main__':
     ]
 
     for ii, test_str in enumerate(tests):
+        print(str(ii) + '.', end='\n\n')
         test_str = re.sub(r'\s+', ' ', test_str)
         test_res = re.sub(r'\s+', ' ', tests_res[ii])
         print(test_str, end='\n\n')
@@ -191,5 +191,10 @@ if __name__ == '__main__':
             t.norm_ for t in doc
             if not (t.is_punct or t.is_bracket or t.is_quote or t._.is_symbol
                     or t.like_num))
+        
         print(result, end='\n\n')
-        assert result == test_res
+
+        try:
+            assert result == test_res
+        except:
+            print(test_res, end='\n\n')

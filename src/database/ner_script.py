@@ -1,5 +1,12 @@
 #!/usr/bin/env python
 
+##
+# 1. Extracts entities from question & answer post bodies 
+# using a trained crf model.
+# 2. Rebuilds the sqlite database inserting the 'Entities' column in
+# 'questions' table.
+##
+
 import os
 import re
 import sys
@@ -25,7 +32,7 @@ q_query = 'SELECT Id, Body FROM questions ORDER BY Id'
 ans_query = 'SELECT ParentId, Body FROM answers ORDER BY ParentId'
 new_qtable = '''CREATE TABLE IF NOT EXISTS "questions" 
     (Id INTEGER, AcceptedAnswerId INTEGER, Title TEXT, Body TEXT, Tags TEXT, 
-    Score INTEGER, Entities, TEXT, SnippetCount INTEGER, Snippets TEXT, 
+    Score INTEGER, Entities TEXT, SnippetCount INTEGER, Snippets TEXT, 
     FavoriteCount INTEGER, ViewCount INTEGER, AnswerCount INTEGER, 
     CommentCount INTEGER, OwnerUserId INTEGER, CreationDate DATETIME, 
     LastEditDate DATETIME)'''

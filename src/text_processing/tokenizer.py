@@ -83,7 +83,7 @@ _var = [r'\d+%$']
 
 
 def get_custom_tokenizer(disable=['tagger', 'parser', 'ner']):
-    nlp = spacy.load('en', disable=disable)
+    nlp = spacy.load('en_core_web_sm', disable=disable)
     nlp.tokenizer = custom_tokenizer(nlp)
     add_custom_properties(nlp)
     return nlp
@@ -125,9 +125,10 @@ def add_custom_properties(nlp):
     # Replace weird behavior when normalizing ('a' -> 'going to' to 'a' -> 'a')
     special_case = [{ORTH: u'a', NORM: u'a'}]
     nlp.tokenizer.add_special_case(u'a', special_case)
-    special_case = [{ORTH: u'is', NORM: u'is'}]
     # Naive replacement of "'s" as "is" (could indicate possession)
+    special_case = [{ORTH: u'is', NORM: u'is'}]
     nlp.tokenizer.add_special_case(u"'s", special_case)
+    # Avoid ('am' -> 'a.m.')
     special_case = [{ORTH: u'am', NORM: u'am'}]
     nlp.tokenizer.add_special_case(u"am", special_case)
 
@@ -179,16 +180,21 @@ if __name__ == '__main__':
     ]
 
     for ii, test_str in enumerate(tests):
+        print(str(ii) + '.', end='\n\n')
         test_str = re.sub(r'\s+', ' ', test_str)
         test_res = re.sub(r'\s+', ' ', tests_res[ii])
         print(test_str, end='\n\n')
         doc = nlp(test_str)
-        result = ' '.join(t.lemma_ for t in doc)
+        result = ' '.join(t.norm_ for t in doc)
         doc = nlp(result)
         result = ' '.join(
-            t.lemma_ for t in doc
+            t.norm_ for t in doc
             if not (t.is_punct or t.is_bracket or t.is_quote or t._.is_symbol
                     or t.like_num))
         
         print(result, end='\n\n')
-        #assert result == test_res
+
+        try:
+            assert result == test_res
+        except:
+            print(test_res, end='\n\n')
