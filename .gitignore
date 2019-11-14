@@ -6,7 +6,6 @@ __pycache__/
 # Project specific files / folders
 *.log
 testing/
-web_app/
 src/data/*
 src/temp_files/
 src/database/*.db
