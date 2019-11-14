@@ -12,7 +12,8 @@ The metadata files include useful information to be presented when a query is is
 
 ## FastText
 
-The [fastText](https://fasttext.cc/) search model produced very relevant results in our experiments showing its power in query semantic similarity (e.g. Read CSV file. Read delimited file.). Although the vectors produced by large text bodies presented worse performance than this of the Tf-Idf model (limited vector dimensions e.g. 300) its ngram utility proved to be a great advantage in query misspellings.
+The [fastText](https://fasttext.cc/) search model produced very relevant results in our experiments showing its power in query semantic similarity (e.g. Read CSV file. Read delimited file.).  
+Although the vectors produced by large text bodies presented worse performance than this of the Tf-Idf model (limited vector dimensions e.g. 300) its ngram utility proved to be a great advantage in query misspellings.
 
 ## Tf-Idf
 
@@ -23,7 +24,7 @@ The [Tf-Idf](https://en.wikipedia.org/wiki/Tf%E2%80%93idf) search model has been
 The Hybrid search model uses a combination of the Tf-Idf and fastText models to infer sentence vectors. It uses by default a formula of `sentence_vector = 0.5*tfidf_vector + 0.5*fasttext_vector`.  
 This model performed the best in our experiments confirming our hypothesis that semantic and statistical models can be combined to produce a performant RSSE.
 
-## (Honorable Mention) GloVe
+## GloVe
 
 The GloVe search model infers word and sentence vectors using the word vector dictionary produced during training. It calculates sentence vectors by mimiking the fastText algorithm (average of the unit norm vectors of every token).  
 While GloVe word vectors have been used in the past with great success, in this project it had a poor performance. This performance can be attributed to the nature and informality of online speech as well as the programming terminology and API calls found in the text.

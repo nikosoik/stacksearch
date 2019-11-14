@@ -36,7 +36,7 @@ The **_Index Builder_** script uses the previously built word embedding models a
 
 The `params.json` file is an easy way to configure the builder script options and file paths.
 
-# Demo
+## Demo
 
 The **_Demo_** script is used to test the final RSSE implementation, and provides three search model options:
 
