@@ -29,7 +29,7 @@ INIT_ANSWER_QUERY = '''SELECT Body, Id FROM answers
 INIT_COMMENT_QUERY = '''SELECT Text AS Body, Id FROM comments
     WHERE PostId IN {id_list} ORDER BY PostId ASC'''
 
-FINAL_QUESTION_QUERY = '''SELECT Id, Title, Tags, SnippetCount, Score FROM questions
+FINAL_QUESTION_QUERY = '''SELECT Id, Title, Tags, Entities, SnippetCount, Score FROM questions
     WHERE Id IN {id_list} ORDER BY Id ASC'''
 FINAL_ANSWER_QUERY = '''SELECT Id, ParentId, Score FROM answers
     WHERE Id IN {id_list} ORDER BY ParentId ASC'''
