@@ -6,10 +6,10 @@ This project focuses on an RSSE for Java queries and makes use of the StackOverf
 
 ## Environment Setup
 
-1. Clone [StackSearch](https://github.com/AuthEceSoftEng/StackSearch) repository and run `make setup`. Handles virtual env setup and dependency installation.
+1. Clone [StackSearch](https://github.com/nikosoik/stacksearch) repository and run `make setup`. Handles virtual env setup and dependency installation.
 
    ```sh
-   git clone git@github.com:AuthEceSoftEng/StackSearch.git ${HOME}/stacksearch && cd ${HOME}/stacksearch/src && make setup
+   git clone git@github.com:nikosoik/stacksearch.git ${HOME}/stacksearch && cd ${HOME}/stacksearch/src && make setup
    ```
 
 2. Source the activate file to get into the python virtual environment.
