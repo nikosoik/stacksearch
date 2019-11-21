@@ -1,3 +1,3 @@
 # Named Entity Recognition Utils
 
-_NOTE: In order to use the scripts in this folder, the [crfsuite](http://www.chokkan.org/software/crfsuite/) python binding has to be installed. Follow the instructions on page. Don't forget to install the required additional [libLBFGS](http://www.chokkan.org/software/liblbfgs/) library._
+_NOTE: In order to use the scripts in this directory, the [crfsuite](http://www.chokkan.org/software/crfsuite/) python binding is required. Additionally don't forget to install the companion [libLBFGS](http://www.chokkan.org/software/liblbfgs/) library. For more information follow the instructions on the [crfsuite page](http://www.chokkan.org/software/crfsuite/)._
