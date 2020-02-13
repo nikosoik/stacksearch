@@ -42,7 +42,7 @@ def fasttext_demo(args):
                         index_keys=index_keys,
                         metadata_path=get_abs_path(args.metadata_path))
 
-    ft.cli_search(num_results=args.num_res)
+    ft.cli_search(num_results=int(args.num_res))
 
 
 def hybrid_demo(args):
@@ -53,7 +53,7 @@ def hybrid_demo(args):
                       index_keys=index_keys,
                       metadata_path=get_abs_path(args.metadata_path))
 
-    hy.cli_search(num_results=args.num_res)
+    hy.cli_search(num_results=int(args.num_res))
 
 
 def tfidf_demo(args):
@@ -62,7 +62,7 @@ def tfidf_demo(args):
                         index_keys=index_keys,
                         metadata_path=get_abs_path(args.metadata_path))
 
-    tfidf.cli_search(num_results=args.num_res)
+    tfidf.cli_search(num_results=int(args.num_res))
 
 
 class _HelpAction(argparse._HelpAction):
