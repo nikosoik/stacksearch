@@ -558,7 +558,7 @@ def postlink_eval(index_path, metadata_path, export_dir):
         start_index=0,
         part_size=500000,
         batch_size=120,
-        model='tfidf'
+        model='tfidf',
         version=tfidf_version)
     
     

@@ -260,12 +260,12 @@ class BaseSearchModel:
 
         clear_screen()
 
-    def search(self,
-               num_results=20,
-               field_weights=None,
-               ranking_fn=None,
-               postid_fn=None):
-        """Provides the main search function, and the entry point of the search
+    def cli_search(self,
+                   num_results=20,
+                   field_weights=None,
+                   ranking_fn=None,
+                   postid_fn=None):
+        """Provides the CLI search function, and the entry point of the search
         model.
 
         Args:
@@ -317,3 +317,10 @@ class BaseSearchModel:
 
             if postid_fn:
                 postid_fn(list(meta_df.index))
+
+    def search(self,
+               num_results=10,
+               field_weights=None,
+               ranking_fn=None,
+               postid_fn=None):
+        pass

@@ -1,0 +1,18 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Project specific files / folders
+*.log
+testing
+evaluation
+# src
+src/data/*
+src/ner
+src/database
+src/temp_files
+src/code_parser
+src/text_processing
+src/post_classifier
+src/wordvec_models/train_data

@@ -25,6 +25,12 @@ class FastTextSearch(BaseSearchModel):
                 1, -1)
         }
 
+    def cli_search(self, num_results=20, field_weights=None, postid_fn=None):
+        super().cli_search(num_results=num_results,
+                           field_weights=field_weights,
+                           ranking_fn=self.ranking,
+                           postid_fn=postid_fn)
+
     def search(self, num_results=20, field_weights=None, postid_fn=None):
         super().search(num_results=num_results,
                        field_weights=field_weights,

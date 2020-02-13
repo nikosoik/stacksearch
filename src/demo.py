@@ -8,6 +8,9 @@ from wordvec_models.tfidf_model import TfIdfSearch
 from wordvec_models.fasttext_model import FastTextSearch
 from wordvec_models.hybrid_model import HybridSearch
 
+## Script directory
+script_dir = os.path.dirname(os.path.realpath(__file__))
+
 ## Default Index Keys
 # Valid keys depend on the index_builder output
 # Possible keys could include BodyV, TitleV, TagV
@@ -28,34 +31,38 @@ DESC_MSG = colors.BOLD + colors.HEADER + 'StackSearch Demo' + colors.ENDC
 PARSER_HEADER = colors.BLUE + colors.BOLD + '\nSearch model \'{}\'' + colors.ENDC
 
 
+def get_abs_path(path):
+    return os.path.join(script_dir, path)
+
+
 ## Demo Functions
 def fasttext_demo(args):
-    ft = FastTextSearch(model_path=args.model_path,
-                        index_path=args.index_path,
+    ft = FastTextSearch(model_path=get_abs_path(args.model_path),
+                        index_path=get_abs_path(args.index_path),
                         index_keys=index_keys,
-                        metadata_path=args.metadata_path)
+                        metadata_path=get_abs_path(args.metadata_path))
 
-    ft.search()
+    ft.cli_search(num_results=args.num_res)
 
 
 def hybrid_demo(args):
-    hy = HybridSearch(ft_model_path=args.ft_model_path,
-                      ft_index_path=args.ft_index_path,
-                      tfidf_model_path=args.tfidf_model_path,
-                      tfidf_index_path=args.tfidf_index_path,
+    hy = HybridSearch(ft_model_path=get_abs_path(args.ft_model_path),
+                      ft_index_path=get_abs_path(args.ft_index_path),
+                      tfidf_model_path=get_abs_path(args.tfidf_model_path),
+                      tfidf_index_path=get_abs_path(args.tfidf_index_path),
                       index_keys=index_keys,
-                      metadata_path=args.metadata_path)
+                      metadata_path=get_abs_path(args.metadata_path))
 
-    hy.search()
+    hy.cli_search(num_results=args.num_res)
 
 
 def tfidf_demo(args):
-    tfidf = TfIdfSearch(model_path=args.model_path,
-                        index_path=args.index_path,
+    tfidf = TfIdfSearch(model_path=get_abs_path(args.model_path),
+                        index_path=get_abs_path(args.index_path),
                         index_keys=index_keys,
-                        metadata_path=args.metadata_path)
+                        metadata_path=get_abs_path(args.metadata_path))
 
-    tfidf.search()
+    tfidf.cli_search(num_results=args.num_res)
 
 
 class _HelpAction(argparse._HelpAction):
