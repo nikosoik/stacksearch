@@ -14,23 +14,31 @@ TOKEN_RE = r'\S\S+'
 class TfIdfSearch(BaseSearchModel):
     def __init__(self, model_path, index_path, index_keys, metadata_path):
         self.model = self._read_pickle(model_path)
-        print('TFIDF model {} loaded.'.format(os.path.basename(model_path)))
-        super().__init__(index_path, index_keys, metadata_path)
+        print('tf-idf model: {} \u2713'.format(
+            os.path.basename(model_path)))
+        super().__init__(index_path, index_keys, metadata_path, 'tf-idf')
 
     def infer_vector(self, text):
         return {'query_vec': self.model.transform([text.lower().strip()])}
 
-    def cli_search(self, num_results=20, field_weights=None, postid_fn=None):
+    def cli_search(self, num_results=10, field_weights=None, postid_fn=None):
         super().cli_search(num_results=num_results,
                            field_weights=field_weights,
                            ranking_fn=self.ranking,
                            postid_fn=postid_fn)
 
-    def search(self, num_results=20, field_weights=None, postid_fn=None):
-        super().search(num_results=num_results,
-                       field_weights=field_weights,
-                       ranking_fn=self.ranking,
-                       postid_fn=postid_fn)
+    def search(self,
+               query,
+               tags=None,
+               num_results=10,
+               field_weights=None,
+               postid_fn=None):
+        return super().search(query=query,
+                              tags=tags,
+                              num_results=num_results,
+                              field_weights=field_weights,
+                              ranking_fn=self.ranking,
+                              postid_fn=postid_fn)
 
 
 def load_text_list(filename):

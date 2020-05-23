@@ -10,14 +10,18 @@ import pandas as pd
 from tabulate import tabulate
 from sklearn.metrics.pairwise import cosine_similarity
 
+from text_processing.tokenizer import get_custom_tokenizer
+
 ## StackOverflow Base URL
 base_url = 'https://stackoverflow.com/questions/'
 
 ## Error Strings
-no_metadata_error = 'A metadata file extended (etags) or otherwise must be provided'
+no_metadata_error = 'A metadata file, extended (etags) or otherwise, must be provided'
 cw_sum_error = '"field_weights" array elements must have a sum of 1.'
 cw_num_el_error = '"field_weights" array must be of length {}.'
 cw_type_error = '"field_weights" variable must be of type ndarray.'
+q_type_error = '"query" variable must be of type str.'
+t_error_type = '"tags" variable must be of type list.'
 
 ## Presenter Strings
 code_div = '################################# CODE #################################'
@@ -30,7 +34,9 @@ class BaseSearchModel:
     Given a user text query the corresponding vector is inferred using the 
     vector space model each subclass utilizes (FastText, TFIDF etc.)
     """
-    def __init__(self, index_path, index_keys, metadata_path):
+    def __init__(self, index_path, index_keys, metadata_path, name):
+        self.name = name
+        self.tok = get_custom_tokenizer()
         self.index = self._read_pickle(index_path)
         for key in list(self.index.keys()):
             if key not in index_keys:
@@ -39,17 +45,10 @@ class BaseSearchModel:
         self.num_index_keys = len(self.index)
         self.index_size = (next(iter(self.index.values()))).shape[0]
         print('Index keys used:', ', '.join(self.index.keys()), end='\n\n')
-
         mtdt = self._read_pickle(metadata_path)
         self.metadata = mtdt['metadata']
         self.etag_lookup = mtdt['etag_lookup']
         mtdt = None
-
-    def infer_vector(self, text):
-        """Function used to infer sentence vectors with the use of
-        word vector model.
-        """
-        raise NotImplementedError
 
     def _read_pickle(self, filepath):
         """Utility function for loading pickled objects.
@@ -74,6 +73,41 @@ class BaseSearchModel:
         """
         with open(filepath, 'rb') as f:
             return json.load(f)
+
+    def _check_custom_weights(self, field_weights):
+        """Utility function used to validate the provided search weights
+
+        Args:
+            field_weights: Field weights (Title, Body, Tags) for the calculation of sims.
+
+        Exception:
+            Raises a ValueError when the given weights are invalid. 
+        """
+        if isinstance(field_weights, np.ndarray):
+            if len(field_weights) == self.num_index_keys:
+                if field_weights.sum() != 1:
+                    raise ValueError(cw_sum_error)
+            else:
+                raise ValueError(cw_num_el_error.format(self.num_index_keys))
+        else:
+            raise TypeError(cw_type_error)
+
+    def _normalize_query(self, query):
+        """Function used to normalize text in a given query
+        
+        Args:
+            query: Unprocessed string representation of the search query
+
+        Returns:
+            A normalized and processed string of the given query.
+        """
+        # ensure quality
+        doc = self.tok(query.strip())
+        norm_query = ' '.join(t.norm_ for t in doc
+                              if not (t.is_punct or t.is_bracket or t.is_quote
+                                      or t._.is_symbol or t.like_num))
+        doc = self.tok(norm_query)
+        return ' '.join(t.norm_ for t in doc)
 
     def _index_filter(self, indices, tags):
         """Given a list of tags, filter the index list by retaining indices
@@ -162,6 +196,12 @@ class BaseSearchModel:
         indices = indices[:num_results]
         sim_values = [(-sims[i]) for i in indices]
         return indices, sim_values
+
+    def infer_vector(self, text):
+        """Function used to infer sentence vectors with the use of
+        word vector model.
+        """
+        raise NotImplementedError
 
     def metadata_frame(self, indices, sim_values):
         """Given a ranked list of indices and their similarity values build
@@ -261,11 +301,11 @@ class BaseSearchModel:
         clear_screen()
 
     def cli_search(self,
-                   num_results=20,
+                   num_results=10,
                    field_weights=None,
                    ranking_fn=None,
                    postid_fn=None):
-        """Provides the CLI search function, and the entry point of the search
+        """Provides the CLI search function, and an entry point for the search
         model.
 
         Args:
@@ -277,26 +317,14 @@ class BaseSearchModel:
             postid_fn: A function that can be used to manipulate and use the PostIds of
                        the results.
         """
-        def check_custom_weights(field_weights):
-            if isinstance(field_weights, np.ndarray):
-                if len(field_weights) == self.num_index_keys:
-                    if field_weights.sum() == 1:
-                        return field_weights
-                    else:
-                        raise ValueError(cw_sum_error)
-                else:
-                    raise ValueError(
-                        cw_num_el_error.format(self.num_index_keys))
-            else:
-                raise TypeError(cw_type_error)
-
         if field_weights:
-            field_weights = check_custom_weights(field_weights)
+            self._check_custom_weights(field_weights)
 
         while (True):
             query = input('Query [query + enter], quit [\'q\' + enter]: ')
             if query == 'q':
                 break
+            query = self._normalize_query(query)
 
             tags = input('Tags (e.g. java, android): ')
             tags = tags.replace(' ', '').replace(',', ' ').strip()
@@ -319,8 +347,47 @@ class BaseSearchModel:
                 postid_fn(list(meta_df.index))
 
     def search(self,
+               query,
+               tags=None,
                num_results=10,
                field_weights=None,
                ranking_fn=None,
                postid_fn=None):
-        pass
+        """Provides a JSON-response search function, and an entry point for the search
+        model.
+
+        Args:
+            query: The string representation of the search query.
+            tags: A list of tags for filtering results.
+            num_results: An integer used to limit the presented results.
+            field_weights: A list of floats used in the similarity calculation formula
+                           as weights for the index fields (Title, Body, Tags).
+            ranking_fn: The function that is used to rank the indices based on the 
+                        similarities it calculates.
+            postid_fn: A function that can be used to manipulate and use the PostIds of
+                       the results.
+        """
+        if field_weights:
+            self._check_custom_weights(field_weights)
+
+        if not isinstance(query, str):
+            raise TypeError(q_type_error)
+
+        if tags:
+            if not isinstance(tags, list):
+                raise TypeError(t_error_type)
+            elif len(tags) == 0:
+                tags = None
+
+        query = self._normalize_query(query)
+        query_vec = self.infer_vector(query)
+        indices, sim_values = ranking_fn(**query_vec,
+                                         num_results=num_results,
+                                         field_weights=field_weights,
+                                         tags=tags)
+        meta_df, top_tags = self.metadata_frame(indices, sim_values)
+
+        if postid_fn:
+            postid_fn(list(meta_df.index))
+
+        return meta_df, top_tags

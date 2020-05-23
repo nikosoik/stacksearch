@@ -1,0 +1,434 @@
+[
+  {
+    "id": 1,
+    "query": "How do I compress or zip a directory recursively?",
+    "ss_tags": ["java", "zip", "file", "compression", "file-io", "apache-commons", "directory", "files"],
+    "ss_rel": 4,
+    "cr_rel": 6,
+    "cr_no_code": 1,
+    "comments": "Crokage returned 1 result with no code snippet. Relevant results: [ss: 4, cr: 6]"
+  },
+  {
+    "id": 2,
+    "query": "How do I compress a file in GZip format?",
+    "ss_tags": ["java", "gzip", "outputstream", "inputstream", "bytearrayoutputstream", "bufferedreader", "gzipinputstream", "gzipoutputstream"],
+    "ss_rel": 6,
+    "cr_rel": 3,
+    "cr_no_code": 3,
+    "comments": "Crokage returned 3 results with no code snippet. Relevant results: [ss: 6, cr: 3]"
+  },
+  {
+    "id": 3,
+    "query": "How do I parse a text string into date and time?",
+    "ss_tags": ["java", "date", "string", "android", "simpledateformat", "parsing", "datetime", "format"],
+    "ss_rel": 9,
+    "cr_rel": 7,
+    "cr_no_code": 0,
+    "comments": "Relevant results: [ss: 9, cr: 7]"
+  },
+  {
+    "id": 4,
+    "query": "How do I send an HTML email?",
+    "ss_tags": ["java", "javamail", "email", "html", "setcontent", "mimemessage.setcontent", "spring", "android"],
+    "ss_rel": 3,
+    "cr_rel": 2,
+    "cr_no_code": 0,
+    "comments": "Relevant results: [ss: 3, cr: 2]"
+  },
+  {
+    "id": 5,
+    "query": "Creating MySql database programatically in Java.",
+    "ss_tags": ["java", "mysql", "jdbc", "netbeans", "sqlexception", "jar", "database", "tcp"],
+    "ss_rel": 4,
+    "cr_rel": 2,
+    "cr_no_code": 6,
+    "comments": "Crokage returned 6 results with no code snippet. Relevant results: [ss: 4, cr: 2]"
+  },
+  {
+    "id": 6,
+    "query": "How do I calculate the MD5 digest of a string?",
+    "ss_tags": ["md5", "java", "messagedigest", "hashcode", "android", "php", "openjdk", "xubuntu"],
+    "ss_rel": 8,
+    "cr_rel": 7,
+    "cr_no_code": 0,
+    "comments": "Relevant results: [ss: 8, cr: 7]"
+  },
+  {
+    "id": 7,
+    "query": "How to implement the hashCode and equals method using Apache Commons?",
+    "ss_tags": ["java", "hashcode", "equals", "eclipse", "hashset", "object", "java-ee-7", "hibernate"],
+    "ss_rel": 6,
+    "cr_rel": 4,
+    "cr_no_code": 4,
+    "comments": "Crokage returned 4 results with no code snippet. Relevant results: [ss: 6, cr: 4]"
+  },
+  {
+    "id": 8,
+    "query": "How do I move a file in JDK 7?",
+    "ss_tags": ["java", "file", "file-io", "scanner", "jar", "io", "filewriter", "android"],
+    "ss_rel": 2,
+    "cr_rel": 4,
+    "cr_no_code": 4,
+    "comments": "StackSearch poor performance. Crokage returned 4 results with no code snippet. Relevant results: [ss: 2, cr: 4]"
+  },
+  {
+    "id": 9,
+    "query": "How to recursively list all text files in a directory?",
+    "ss_tags": ["java", "file", "recursion", "file-io", "isdirectory", "files.find", "java-7", "files.walkfiletree"],
+    "ss_rel": 9,
+    "cr_rel": 6,
+    "cr_no_code": 1,
+    "comments": "Crokage returned 1 result with no code snippet. Relevant results: [ss: 9, cr: 6]"
+  },
+  {
+    "id": 10,
+    "query": "How do I copy a file in JDK 7?",
+    "ss_tags": ["java", "bufferedreader", "file", "file-copying", "jar", "android", "filereader", "mappedbytebuffer"],
+    "ss_rel": 5,
+    "cr_rel": 2,
+    "cr_no_code": 8,
+    "comments": "Crokage poor performance. Crokage returned 8 results with no code snippet. Relevant results: [ss: 5, cr: 2]"
+  },
+  {
+    "id": 11,
+    "query": "How do I reverse the order of array elements?",
+    "ss_tags": ["java", "arrays", "reverse", "collections.reverse", "arraylist", "guava", "methods", "listiterator"],
+    "ss_rel": 8,
+    "cr_rel": 6,
+    "cr_no_code": 1,
+    "comments": "Crokage returned 1 result with no code snippet. Relevant results: [ss: 8, cr: 6]"
+  },
+  {
+    "id": 12,
+    "query": "How do I get all available currency codes?",
+    "ss_tags": ["java", "currency", "currency.getinstance", "android", "currency-formatting", "number-formatting", "xml", "maven"],
+    "ss_rel": 5,
+    "cr_rel": 5,
+    "cr_no_code": 0,
+    "comments": "Relevant results: [ss: 5, cr: 5]"
+  },
+  {
+    "id": 13,
+    "query": "How do I delete entity object in JPA?",
+    "ss_tags": ["java", "jpa", "entitymanager", "google-cloud-datastore", "google-app-engine", "spring", "hibernate", "ebean"],
+    "ss_rel": 3,
+    "cr_rel": 6,
+    "cr_no_code": 4,
+    "comments": "Crokage returned 4 results with no code snippet. Relevant results: [ss: 3, cr: 6]"
+  },
+  {
+    "id": 14,
+    "query": "How to create an XML file of a POJO using JAXB?",
+    "ss_tags": ["jaxb", "java", "xml", "pojo", "java.util.map", "soap", "javax.xml.soap", "exception"],
+    "ss_rel": 2,
+    "cr_rel": 3,
+    "cr_no_code": 1,
+    "comments": "Crokage returned 1 result with no code snippet. Relevant results: [ss: 2, cr: 3]"
+  },
+  {
+    "id": 15,
+    "query": "How do I retrieve available schemas in database?",
+    "ss_tags": ["java", "jdbc", "schema", "database", "jsp", "spring", "jpa", "sql"],
+    "ss_rel": 2,
+    "cr_rel": 0,
+    "cr_no_code": 6,
+    "comments": "Crokage returned 6 results with no code snippet. Relevant results: [ss: 2, cr: 0]"
+  },
+  {
+    "id": 16,
+    "query": "How do I convert raw IP address to String?",
+    "ss_tags": ["java", "ip", "ip-address", "getlocalhost", "inetaddress.getlocalhost", "getbyname", "inetaddress", "jar"],
+    "ss_rel": 3,
+    "cr_rel": 4,
+    "cr_no_code": 1,
+    "comments": "Crokage returned 1 results with no code snippet. Relevant results: [ss: 3, cr: 4]"
+  },
+  {
+    "id": 17,
+    "query": "How do I break a paragraph into sentences?",
+    "ss_tags": ["java", "string", "breakiterator", "regex", "text-segmentation", "arrays.tostring", "android", "sentence"],
+    "ss_rel": 6,
+    "cr_rel": 8,
+    "cr_no_code": 0,
+    "comments": "Relevant results: [ss: 6, cr: 8]"
+  },
+  {
+    "id": 18,
+    "query": "How do I get JDBC driver property information?",
+    "ss_tags": ["jdbc", "java", "jar", "drivermanager", "driver", "database", "drivermanager.getconnection", "class.forname"],
+    "ss_rel": 2,
+    "cr_rel": 0,
+    "cr_no_code": 5,
+    "comments": "Crokage very poor performance. Crokage returned 5 results with no code snippet. Relevant results: [ss: 2, cr: 0]"
+  },
+  {
+    "id": 19,
+    "query": "How do I get list of files from FTP server?",
+    "ss_tags": ["java", "ftp", "channel", "spring", "camel", "apache-camel", "apache-commons-net", "ftp-server"],
+    "ss_rel": 2,
+    "cr_rel": 4,
+    "cr_no_code": 3,
+    "comments": "Crokage returned 3 results with no code snippet. Relevant results: [ss: 2, cr: 4]"
+  },
+  {
+    "id": 20,
+    "query": "How do I create an Excel document using Apache POI?",
+    "ss_tags": ["java", "apache-poi", "excel", "apache", "java8", "csv", "eclipse", "jakarta poi"],
+    "ss_rel": 3,
+    "cr_rel": 7,
+    "cr_no_code": 0,
+    "comments": "Relevant results: [ss: 3, cr: 7]"
+  },
+  {
+    "id": 21,
+    "query": "Redirect Servlet Call to Another URL.",
+    "ss_tags": ["java", "servlet", "servlets", "jsp", "http", "redirect", "httpclient", "java-ee"],
+    "ss_rel": 8,
+    "cr_rel": 6,
+    "cr_no_code": 3,
+    "comments": "Crokage returned 3 results with no code snippet. Relevant results: [ss: 8, cr: 6]"
+  },
+  {
+    "id": 22,
+    "query": "Building Lucene search query.",
+    "ss_tags": ["java", "lucene", "hibernate", "hibernate-search", "full-text-search", "netbeans", "apache lucene", "jar"],
+    "ss_rel": 7,
+    "cr_rel": 6,
+    "cr_no_code": 1,
+    "comments": "Crokage returned 1 result with no code snippet. Relevant results: [ss: 7, cr: 6]"
+  },
+  {
+    "id": 23,
+    "query": "How to serialize JSON Object.",
+    "ss_tags": ["json", "java", "gson", "jackson", "serialization", "android", "jsonobject", "simpledateformat"],
+    "ss_rel": 6,
+    "cr_rel": 7,
+    "cr_no_code": 1,
+    "comments": "Crokage returned 1 result with no code snippet. Relevant results: [ss: 6, cr: 7]"
+  },
+  {
+    "id": 24,
+    "query": "How to Sort a Map by values?",
+    "ss_tags": ["java", "sorting", "collections.sort", "list", "keyset", "dictionary", "collections", "comparable"],
+    "ss_rel": 5,
+    "cr_rel": 5,
+    "cr_no_code": 0,
+    "comments": "Relevant results: [ss: 5, cr: 5]"
+  },
+  {
+    "id": 25,
+    "query": "How to load an image and write text to it?",
+    "ss_tags": ["java", "image", "text", "png", "graphics", "imageio", "drawstring", "bufferedimage"],
+    "ss_rel": 7,
+    "cr_rel": 6,
+    "cr_no_code": 3,
+    "comments": "Crokage returned 3 results with no code snippet. Relevant results: [ss: 7, cr: 6]"
+  },
+  {
+    "id": 26,
+    "query": "Read file as bytes.",
+    "ss_tags": ["java", "file", "fileinputstream", "byte", "bufferedreader", "randomaccessfile", "inputstream", "android"],
+    "ss_rel": 5,
+    "cr_rel": 4,
+    "cr_no_code": 1,
+    "comments": "Crokage returned 1 result with no code snippet. Relevant results: [ss: 5, cr: 4]"
+  },
+  {
+    "id": 27,
+    "query": "Copy a directory recursively.",
+    "ss_tags": ["java", "directory", "recursion", "files.walkfiletree", "file-io", "java.io.file", "fileutils.copydirectory", "jdk7"],
+    "ss_rel": 4,
+    "cr_rel": 6,
+    "cr_no_code": 1,
+    "comments": "Crokage returned 1 result with no code snippet. Relevant results: [ss: 4, cr: 6]"
+  },
+  {
+    "id": 28,
+    "query": "Convert Between a File Path and a URL.",
+    "ss_tags": ["java", "file", "android", "uri", "json", "url", "fileoutputstream", "jdk1.5"],
+    "ss_rel": 3,
+    "cr_rel": 4,
+    "cr_no_code": 1,
+    "comments": "Crokage returned 1 result with no code snippet. Relevant results: [ss: 3, cr: 4]"
+  },
+  {
+    "id": 29,
+    "query": "Compare the contents of two Streams to determine if they are equal or not.",
+    "ss_tags": ["java", "arrays", "hashset", "junit", "java-8", "java-stream", "arraylist", "hashmap"],
+    "ss_rel": 3,
+    "cr_rel": 3,
+    "cr_no_code": 1,
+    "comments": "Crokage returned 1 result with no code snippet. Relevant results: [ss: 3, cr: 3]"
+  },
+  {
+    "id": 30,
+    "query": "Load image from local folder.",
+    "ss_tags": ["java", "arrays", "hashset", "junit", "java-8", "java-stream", "arraylist", "hashmap"],
+    "ss_rel": 7,
+    "cr_rel": 6,
+    "cr_no_code": 2,
+    "comments": "Crokage returned 2 results with no code snippet. Relevant results: [ss: 7, cr: 6]"
+  },
+  {
+    "id": 31,
+    "query": "Connect to a SQLite database.",
+    "ss_tags": ["java", "sqlite", "jdbc", "eclipse", "android", "sql", "database", "sqliteopenhelper"],
+    "ss_rel": 3,
+    "cr_rel": 6,
+    "cr_no_code": 1,
+    "comments": "Crokage returned 1 result with no code snippet. Relevant results: [ss: 3, cr: 6]"
+  },
+  {
+    "id": 32,
+    "query": "How to download a complete folder from a FTP server?",
+    "ss_tags": ["java", "ftp", "download", "apache-commons", "apache-commons-net", "ftpclient.restart", "ftp-client", "ftp.isconnected"],
+    "ss_rel": 2,
+    "cr_rel": 2,
+    "cr_no_code": 1,
+    "comments": "Crokage returned 1 result with no code snippet. Relevant results: [ss: 2, cr: 2]"
+  },
+  {
+    "id": 33,
+    "query": "Generate random integer.",
+    "ss_tags": ["java", "random", "java.util.random", "math.random", "numbers", "nextint", "range", "biginteger"],
+    "ss_rel": 10,
+    "cr_rel": 10,
+    "cr_no_code": 0,
+    "comments": "Relevant results: [ss: 10, cr: 10]"
+  },
+  {
+    "id": 34,
+    "query": "How do I format a number with leading zeros?",
+    "ss_tags": ["java", "algorithm", "string", "bit-manipulation", "converter", "binary", "alphanumeric", "charmatcher"],
+    "ss_rel": 5,
+    "cr_rel": 5,
+    "cr_no_code": 0,
+    "comments": "Relevant results: [ss: 5, cr: 5]"
+  },
+  {
+    "id": 35,
+    "query": "How do I ping a host?",
+    "ss_tags": ["java", "ping", "icmp", "tcp", "windows", "isreachable", "android", "command-line"],
+    "ss_rel": 7,
+    "cr_rel": 9,
+    "cr_no_code": 0,
+    "comments": "Relevant results: [ss: 7, cr: 9]"
+  },
+  {
+    "id": 36,
+    "query": "Read a text file and display it line by line.",
+    "ss_tags": ["java", "java.util.scanner", "arrays", "scanner", "formatting", "android", "java-io", "exception"],
+    "ss_rel": 5,
+    "cr_rel": 1,
+    "cr_no_code": 5,
+    "comments": "Crokage poor performance. Crokage returned 5 results with no code snippet. Relevant results: [ss: 5, cr: 1]"
+  },
+  {
+    "id": 37,
+    "query": "How do I pause the current thread?",
+    "ss_tags": ["java", "wait", "multithreading", "android", "runnable", "notify", "object.wait", "object.notify"],
+    "ss_rel": 7,
+    "cr_rel": 7,
+    "cr_no_code": 1,
+    "comments": "Crokage returned 1 result with no code snippet. Relevant results: [ss: 7, cr: 7]"
+  },
+  {
+    "id": 38,
+    "query": "Java Program to display first 100 prime numbers.",
+    "ss_tags": ["java", "primes", "arrays", "main", "methods", "math", "math.pow", "jframe"],
+    "ss_rel": 9,
+    "cr_rel": 6,
+    "cr_no_code": 1,
+    "comments": "Crokage returned 1 result with no code snippet. Relevant results: [ss: 9, cr: 6]"
+  },
+  {
+    "id": 39,
+    "query": "Java Program to find ASCII value of a character.",
+    "ss_tags": ["java", "ascii", "character", "string", "charat", "arrays", "integer.parseint", "android"],
+    "ss_rel": 4,
+    "cr_rel": 4,
+    "cr_no_code": 0,
+    "comments": "Relevant results: [ss: 4, cr: 4]"
+  },
+  {
+    "id": 40,
+    "query": "Find maximum element of ArrayList.",
+    "ss_tags": ["java", "arraylist", "android", "random", "linkedhashset", "list", "map.merge", "tomap"],
+    "ss_rel": 3,
+    "cr_rel": 6,
+    "cr_no_code": 0,
+    "comments": "Relevant results: [ss: 3, cr: 6]"
+  },
+  {
+    "id": 41,
+    "query": "Write lines of text to file using a PrintWriter.",
+    "ss_tags": ["printwriter", "java", "file", "filewriter", "text", "io", "text-files", "bufferedwriter"],
+    "ss_rel": 8,
+    "cr_rel": 7,
+    "cr_no_code": 1,
+    "comments": "Crokage returned 1 result with no code snippet. Relevant results: [ss: 8, cr: 7]"
+  },
+  {
+    "id": 42,
+    "query": "How do I get the last element of SortedSet?",
+    "ss_tags": ["java", "sortedset", "navigableset", "treeset", "collections", "iterator", "first", "concurrentskiplistset"],
+    "ss_rel": 2,
+    "cr_rel": 0,
+    "cr_no_code": 2,
+    "comments": "Crokage poor performance. Crokage returned 2 results with no code snippet. Relevant results: [ss: 2, cr: 0]"
+  },
+  {
+    "id": 43,
+    "query": "Load an Image from a JAR file.",
+    "ss_tags": ["java", "jar", "image", "inputstream", "imageio.read", "imageicon", "ant", "class.getresourceasstream"],
+    "ss_rel": 8,
+    "cr_rel": 8,
+    "cr_no_code": 0,
+    "comments": "Relevant results: [ss: 8, cr: 8]"
+  },
+  {
+    "id": 44,
+    "query": "Java Program to find Factorial of a number using Recursion.",
+    "ss_tags": ["java", "factorial", "recursion", "biginteger", "trace", "algorithm", "scanner", "system.out.print"],
+    "ss_rel": 4,
+    "cr_rel": 3,
+    "cr_no_code": 4,
+    "comments": "Crokage returned 4 results with no code snippet. Relevant results: [ss: 4, cr: 3]"
+  },
+  {
+    "id": 45,
+    "query": "Java Program to Check Even or Odd Number.",
+    "ss_tags": ["java", "nested-loops", "pythagorean", "debugging"],
+    "ss_rel": 7,
+    "cr_rel": 7,
+    "cr_no_code": 0,
+    "comments": "Relevant results: [ss: 7, cr: 7]"
+  },
+  {
+    "id": 46,
+    "query": "How do I convert number into Roman Numerals?",
+    "ss_tags": ["java", "roman-numerals", "regex", "mvel", "integer", "scanner.hasnextint", "methods", "vi"],
+    "ss_rel": 1,
+    "cr_rel": 3,
+    "cr_no_code": 2,
+    "comments": "Crokage returned 2 results with no code snippet. Relevant results: [ss: 1, cr: 3]"
+  },
+  {
+    "id": 47,
+    "query": "Java Program to check Prime Number.",
+    "ss_tags": ["java", "primes", "numbers", "logic-programming", "bluej", "hashmap", "math.sqrt", "algorithm"],
+    "ss_rel": 5,
+    "cr_rel": 8,
+    "cr_no_code": 0,
+    "comments": "Relevant results: [ss: 5, cr: 8]"
+  },
+  {
+    "id": 48,
+    "query": "How do I open a file using the default registered application?",
+    "ss_tags": ["java", "windows", "swing", "file", "desktop.open", "file-io", "desktop", "jdic"],
+    "ss_rel": 6,
+    "cr_rel": 6,
+    "cr_no_code": 3,
+    "comments": "Crokage returned 3 results with no code snippet. Relevant results: [ss: 6, cr: 6]"
+  }
+]

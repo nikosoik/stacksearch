@@ -20,7 +20,24 @@ This project focuses on an RSSE for Java queries and makes use of the StackOverf
    source ${HOME}/.stacksearch/bin/activate
    ```
 
-## Usage
+3. Trained word vector models, metadata and indices can be found [here](https://drive.google.com/open?id=1KyzxHKKZC9ZHfROMSJsrjqK6qaMeRl_E).
+
+## Web App Usage
+
+1. Make sure the word vector models, metadata and indices are placed in the proper directories.
+2. Run the Flask web app.
+
+   ```python
+   python3 web_app.py
+   ```
+
+3. Open [http://localhost:5000/](http://localhost:5000/) in browser.
+
+#### Preview
+
+![StackSearch Web App](webapp_preview.png?raw=true)
+
+## CLI Usage
 
 ```
 demo.py [-h] {fasttext,tfidf,hybrid} ...
@@ -79,7 +96,7 @@ optional arguments:
   -h, --help      show this help message and exit
 ```
 
-## Example
+#### Example
 
 ```sh
 ./demo.py hybrid wordvec_models/fasttext_archive/ft_v0.6.1.bin wordvec_models/tfidf_archive/tfidf_v0.3.pkl wordvec_models/index/ft_v0.6.1_post_index.pkl wordvec_models/index/tfidf_v0.3_post_index.pkl wordvec_models/index/extended_metadata.pkl 20
@@ -113,4 +130,20 @@ Snippets for this post: 3
 Top 8 tags for this query: java, md5, messagedigest, android, spring, checksum, md5sum, hashcode
 
 Next code snippet [enter], new query ['q' + enter]:
+```
+
+## Citation
+
+Please cite our work
+
+```
+@InProceedings{10.1007/978-3-030-45234-6_6,
+  url={https://doi.org/10.1007/978-3-030-45234-6_6}
+  title={Extracting Semantics from Question-Answering Services for Snippet Reuse},
+  author={Themistoklis Diamantopoulos, and Nikolaos Oikonomou, and Andreas Symeonidis},
+  booktitle={Fundamental Approaches to Software Engineering},
+  pages={119--139},
+  year={2020},
+  publisher={Springer International Publishing}
+}
 ```

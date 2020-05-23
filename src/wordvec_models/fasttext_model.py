@@ -15,8 +15,9 @@ class FastTextSearch(BaseSearchModel):
     def __init__(self, model_path, index_path, index_keys, metadata_path):
 
         self.model = load_model(model_path)
-        print('FastText model {} loaded.'.format(os.path.basename(model_path)))
-        super().__init__(index_path, index_keys, metadata_path)
+        print('fastText model: {} \u2713'.format(
+            os.path.basename(model_path)))
+        super().__init__(index_path, index_keys, metadata_path, 'fasttext')
 
     def infer_vector(self, text):
         return {
@@ -25,17 +26,24 @@ class FastTextSearch(BaseSearchModel):
                 1, -1)
         }
 
-    def cli_search(self, num_results=20, field_weights=None, postid_fn=None):
+    def cli_search(self, num_results=10, field_weights=None, postid_fn=None):
         super().cli_search(num_results=num_results,
                            field_weights=field_weights,
                            ranking_fn=self.ranking,
                            postid_fn=postid_fn)
 
-    def search(self, num_results=20, field_weights=None, postid_fn=None):
-        super().search(num_results=num_results,
-                       field_weights=field_weights,
-                       ranking_fn=self.ranking,
-                       postid_fn=postid_fn)
+    def search(self,
+               query,
+               tags=None,
+               num_results=10,
+               field_weights=None,
+               postid_fn=None):
+        return super().search(query=query,
+                              tags=tags,
+                              num_results=num_results,
+                              field_weights=field_weights,
+                              ranking_fn=self.ranking,
+                              postid_fn=postid_fn)
 
 
 def build_doc_vectors(model, doc, export_path=None):

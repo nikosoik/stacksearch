@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>StackSearch</title>
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+    integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
+    integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+  <div id="main" class="row">
+    <section id="search-panel" class="container col d-flex flex-column border shadow-sm jumbotron">
+      <div class="row justify-content-center">
+        <a class="title-link" href="{{ url_for('index') }}">
+          <div class="title-container">
+            <span class="title-banner">stack<strong>search</strong></span>
+          </div>
+        </a>
+      </div>
+      <form id="search-form" action="" class="row d-flex flex-column flex-grow-1">
+        <div class="input-group">
+          <input id="query-input" type="text" class="form-control input-lg" placeholder="Search query...">
+          <div class="input-group-btn">
+            <button id="btn-search" class="btn btn-dark" type="button">
+              <span class="fa fa-search fa-fw" aria-hidden="true"></span>
+            </button>
+          </div>
+        </div>
+        <div class="input-group mb-2 mt-2"">
+            <input id="entity-input" type="text" class="form-control input-lg" placeholder="Add filter tags..."
+          data-toggle="tooltip" title="add multiple tags by separating them with a comma">
+          <div class="input-group-btn">
+            <button id="btn-add-entity" class="btn btn-dark" type="button">
+              <span class="fa fa-plus fa-fw" aria-hidden="true"></span>
+            </button>
+          </div>
+        </div>
+        <div id="tag-container" class="flex-grow-1 flex-fill text-left">
+        </div>
+      </form>
+      <div class="row mt-2">
+        <!--<hr class="flex-grow-1" style="margin-left: 15px; margin-right: 15px;">-->
+        <div class="w-100 mb-1">
+          <div id="model-info" class="note">
+            No model in use...
+          </div>
+          <form action="" class="input-group">
+            <div class="input-group-prepend">
+              <label class="input-group-text" for="model-select">Model:</label>
+            </div>
+            <select id="model-select" class="custom-select">
+              <option value="hybrid" selected>hybrid</option>
+              <option value="fasttext">fasttext</option>
+              <option value="tf-idf">tf-idf</option>
+            </select>
+            <div class="input-group-btn">
+              <button id="btn-load-model" class="btn btn-dark" type="button">Load</button>
+            </div>
+          </form>
+        </div>
+        <hr class="flex-grow-1" style="margin: 2em 1em;">
+        <div class="w-100 text-center">
+          <a target="_blank" href="https://link.springer.com/chapter/10.1007%2F978-3-030-45234-6_6">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon" alt="publication">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+            </svg></a>
+          <a target="_blank" href="https://github.com/nikosoik/stacksearch">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon" alt="github">
+              <path
+                d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22">
+              </path>
+            </svg></a>
+        </div>
+      </div>
+    </section>
+    <section id="content-panel" class="container col d-flex flex-column border shadow-sm">
+      {% block results %}{% endblock %}
+    </section>
+  </div>
+  <!-- jQuery, Bootstrap, Clipboard JS -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
+    integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+
+  <!-- StackSearch utilities JS -->
+  <script src="/static/util.js"></script>
+</body>
+
+</html>

@@ -7,6 +7,8 @@ from numpy.linalg import norm
 
 from wordvec_models.search_model import BaseSearchModel
 
+from text_processing.tokenizer import get_custom_tokenizer
+
 ## Vector building error strings
 doc_path_error = 'Provided document path doesn\'t exist.'
 doc_type_error = 'Invalid "doc" variable type {}. Expected str(path) or list.'
@@ -14,6 +16,7 @@ doc_type_error = 'Invalid "doc" variable type {}. Expected str(path) or list.'
 
 class GloVeModel(BaseSearchModel):
     def __init__(self, wordvec_index, build_index, export_path=None):
+        self.tok = get_custom_tokenizer()
         if build_index:
             if export_path:
                 print('Building wordvec index...')
@@ -67,17 +70,24 @@ class GloVeModel(BaseSearchModel):
             return self.unk_vec
         return svec / count
 
-    def cli_search(self, num_results=20, field_weights=None, postid_fn=None):
+    def cli_search(self, num_results=10, field_weights=None, postid_fn=None):
         super().cli_search(num_results=num_results,
                            field_weights=field_weights,
                            ranking_fn=self.ranking,
                            postid_fn=postid_fn)
 
-    def search(self, num_results=20, field_weights=None, postid_fn=None):
-        super().search(num_results=num_results,
-                       field_weights=field_weights,
-                       ranking_fn=self.ranking,
-                       postid_fn=postid_fn)
+    def search(self,
+               query,
+               tags=None,
+               num_results=10,
+               field_weights=None,
+               postid_fn=None):
+        return super().search(query=query,
+                              tags=tags,
+                              num_results=num_results,
+                              field_weights=field_weights,
+                              ranking_fn=self.ranking,
+                              postid_fn=postid_fn)
 
 
 def load_glove_model(model_path):

@@ -6,6 +6,8 @@ from fasttext import load_model
 
 from wordvec_models.search_model import BaseSearchModel
 
+from text_processing.tokenizer import get_custom_tokenizer
+
 ## Vector building error strings
 doc_path_error = 'Provided document path doesn\'t exist.'
 doc_type_error = 'Invalid "doc" variable type {}. Expected str(path) or list.'
@@ -14,17 +16,19 @@ doc_type_error = 'Invalid "doc" variable type {}. Expected str(path) or list.'
 class HybridSearch(BaseSearchModel):
     def __init__(self, ft_model_path, tfidf_model_path, ft_index_path,
                  tfidf_index_path, index_keys, metadata_path):
-
+        self.name = 'hybrid'
+        self.tok = get_custom_tokenizer()
         self.ft_model = load_model(ft_model_path)
-        print('FastText model {} loaded.'.format(
-            os.path.basename(ft_model_path)))
+        print('fastText model: {} \u2713'.format(
+            os.path.basename(ft_model_path)),
+              end=' ')
         self.ft_index = self._read_pickle(ft_index_path)
         for key in list(self.ft_index.keys()):
             if key not in index_keys:
                 del self.ft_index[key]
 
         self.tfidf_model = self._read_pickle(tfidf_model_path)
-        print('TF-IDF model {} loaded.'.format(
+        print('tf-idf model: {} u\'\u2713\''.format(
             os.path.basename(tfidf_model_path)))
         self.tfidf_index = self._read_pickle(tfidf_index_path)
         for key in list(self.tfidf_index.keys()):
@@ -96,14 +100,21 @@ class HybridSearch(BaseSearchModel):
         sim_values = [(-sims[i]) for i in indices]
         return indices, sim_values
 
-    def cli_search(self, num_results=20, field_weights=None, postid_fn=None):
+    def cli_search(self, num_results=10, field_weights=None, postid_fn=None):
         super().cli_search(num_results=num_results,
                            field_weights=field_weights,
                            ranking_fn=self.hybrid_ranking,
                            postid_fn=postid_fn)
 
-    def search(self, num_results=20, field_weights=None, postid_fn=None):
-        super().search(num_results=num_results,
-                       field_weights=field_weights,
-                       ranking_fn=self.hybrid_ranking,
-                       postid_fn=postid_fn)
+    def search(self,
+               query,
+               tags=None,
+               num_results=10,
+               field_weights=None,
+               postid_fn=None):
+        return super().search(query=query,
+                              tags=tags,
+                              num_results=num_results,
+                              field_weights=field_weights,
+                              ranking_fn=self.hybrid_ranking,
+                              postid_fn=postid_fn)

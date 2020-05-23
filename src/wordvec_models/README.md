@@ -28,3 +28,6 @@ While GloVe word vectors have been used in the past with great success, in this 
 
 The indices produced by the `index_builder.py` script provide a post-vector lookup table in order to calculate cosine similarities with the user given queries.  
 The metadata files include useful information to be presented when a query is issued. When the ranking function returns the top relevant results code snippets and additional useful information is presented alongside them.
+
+`index/`: ~550k posts
+`index.old`: ~200k posts

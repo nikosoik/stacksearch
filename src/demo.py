@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+import json
 import argparse
 
 from wordvec_models.utils import print_linked_posts
@@ -20,6 +21,8 @@ index_keys = ['BodyV', 'TitleV']
 ## Terminal print colors
 class colors:
     HEADER = '\033[95m'
+    RED = '\033[93m'
+    GREEN = '\033[92m'
     BLUE = '\033[94m'
     ENDC = '\033[0m'
     BOLD = '\033[1m'
@@ -30,9 +33,48 @@ class colors:
 DESC_MSG = colors.BOLD + colors.HEADER + 'StackSearch Demo' + colors.ENDC
 PARSER_HEADER = colors.BLUE + colors.BOLD + '\nSearch model \'{}\'' + colors.ENDC
 
+## Banners
+hybrid_banner = colors.BOLD + colors.GREEN + """
+  _             _            _      _ 
+ | |_    _  _  | |__   _ _  (_)  __| |
+ | ' \  | || | | '_ \ | '_| | | / _` |
+ |_||_|  \_, | |_.__/ |_|   |_| \__,_|
+         |__/                         """ + colors.ENDC
+
+fasttext_banner = colors.BOLD + colors.RED + """
+   __               _     _                 _   
+  / _|  __ _   ___ | |_  | |_   ___  __ __ | |_ 
+ |  _| / _` | (_-< |  _| |  _| / -_) \ \ / |  _|
+ |_|   \__,_| /__/  \__|  \__| \___| /_\_\  \__|""" + colors.ENDC
+
+tfidf_banner = colors.BOLD + colors.BLUE + """
+   _      __         _      _    __ 
+ | |_   / _|  ___  (_)  __| |  / _|
+ |  _| |  _| |___| | | / _` | |  _|
+  \__| |_|         |_| \__,_| |_|  """ + colors.ENDC
+
 
 def get_abs_path(path):
     return os.path.join(script_dir, path)
+
+
+def json_results(model, num_res):
+    while (True):
+        query = input('Query [query + enter], quit [enter]: ').strip()
+        if query == '':
+            break
+        tags = input('Tags (e.g. java, android): ')
+        tags = tags.replace(' ', '').replace(',', ' ').strip()
+        if tags == '':
+            tags = None
+        else:
+            tags = list(filter(bool, tags.split()))
+
+        mt_df, top_tags = model.search(query=query,
+                                       tags=tags,
+                                       num_results=num_res)
+        print(top_tags)
+        print(json.dumps(mt_df.to_json(orient='index'), indent=2))
 
 
 ## Demo Functions
@@ -42,7 +84,10 @@ def fasttext_demo(args):
                         index_keys=index_keys,
                         metadata_path=get_abs_path(args.metadata_path))
 
-    ft.cli_search(num_results=int(args.num_res))
+    if args.cli:
+        ft.cli_search(num_results=args.num_res)
+    else:
+        json_results(ft, args.num_res)
 
 
 def hybrid_demo(args):
@@ -53,7 +98,10 @@ def hybrid_demo(args):
                       index_keys=index_keys,
                       metadata_path=get_abs_path(args.metadata_path))
 
-    hy.cli_search(num_results=int(args.num_res))
+    if args.cli:
+        hy.cli_search(num_results=args.num_res)
+    else:
+        json_results(hy, args.num_res)
 
 
 def tfidf_demo(args):
@@ -62,7 +110,10 @@ def tfidf_demo(args):
                         index_keys=index_keys,
                         metadata_path=get_abs_path(args.metadata_path))
 
-    tfidf.cli_search(num_results=int(args.num_res))
+    if args.cli:
+        tfidf.cli_search(num_results=args.num_res)
+    else:
+        json_results(tfidf, args.num_res)
 
 
 class _HelpAction(argparse._HelpAction):
@@ -103,8 +154,14 @@ if __name__ == '__main__':
                            metavar='METADATA',
                            help='Path to the metadata index.')
     ft_parser.add_argument('num_res',
+                           type=int,
                            metavar='RESULTS',
                            help='Number of results for each query.')
+    ft_parser.add_argument('-c',
+                           '--cli',
+                           action='store_true',
+                           default=False,
+                           help='CLI interface. (alt. JSON results)')
     tfidf_parser = subparsers.add_parser(
         'tfidf', help='Use a TF-IDF model for searching.')
     tfidf_parser.add_argument('model_path',
@@ -117,8 +174,15 @@ if __name__ == '__main__':
                               metavar='METADATA',
                               help='Path to the metadata index.')
     tfidf_parser.add_argument('num_res',
+                              type=int,
                               metavar='RESULTS',
                               help='Number of results for each query.')
+
+    tfidf_parser.add_argument('-c',
+                              '--cli',
+                              action='store_true',
+                              default=False,
+                              help='CLI interface. (alt. JSON results)')
     hybrid_parser = subparsers.add_parser(
         'hybrid', help='Use a Hybrid model (FastText & TF-IDF) for searching.')
     hybrid_parser.add_argument('ft_model_path',
@@ -137,17 +201,24 @@ if __name__ == '__main__':
                                metavar='METADATA',
                                help='Path to the metadata index.')
     hybrid_parser.add_argument('num_res',
+                               type=int,
                                metavar='RESULTS',
                                help='Number of results for each query.')
+    hybrid_parser.add_argument('-c',
+                               '--cli',
+                               action='store_true',
+                               default=False,
+                               help='CLI interface. (alt. JSON results)')
 
     args = parser.parse_args()
+    print(args)
 
     if args.model == 'fasttext':
-        print('FastText model')
+        print(fasttext_banner)
         fasttext_demo(args)
     elif args.model == 'tfidf':
-        print('TF-IDF model')
+        print(tfidf_banner)
         tfidf_demo(args)
     elif args.model == 'hybrid':
-        print('Hybrid model')
+        print(hybrid_banner)
         hybrid_demo(args)

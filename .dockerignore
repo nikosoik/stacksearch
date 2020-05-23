@@ -13,6 +13,5 @@ src/ner
 src/database
 src/temp_files
 src/code_parser
-src/text_processing
 src/post_classifier
 src/wordvec_models/train_data

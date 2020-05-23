@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block alerts %}
+
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+{% for message in messages %}
+    <div class="alert alert-info alert-dismissible fade-in" id="alert-popup">
+    <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+    <strong>info: </strong>{{ message }}
+    </div>
+{% endfor %}
+{% endif %}
+{% endwith %}
+{% endblock %}
